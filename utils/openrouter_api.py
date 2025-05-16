@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 # Get API key from environment variables with fallback
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1/chat/completions"
-MODEL = "mistralai/mistral-small-3.1-24b-instruct:free"
+MODEL = "mistralai/mixtral-8x7b-instruct:free"  # More advanced model
 
 headers = {
     "Content-Type": "application/json",
@@ -58,16 +58,59 @@ def send_api_request(prompt, max_tokens=2000):
 
 def optimize_cv(cv_text, job_description):
     """
-    Optimize a CV based on a job description
+    Create an optimized version of CV using advanced AI processing
     """
     prompt = f"""
-    TASK: Stwórz nową, zoptymalizowaną wersję CV idealnie dopasowaną do podanego opisu stanowiska.
+    TASK: Stwórz całkowicie nową, spersonalizowaną wersję CV precyzyjnie dopasowaną do wymagań stanowiska.
     
-    Ważne wytyczne:
-    1. Wykorzystaj informacje z oryginalnego CV jako bazę danych o kandydacie, ale:
-       - Przepisz każde doświadczenie zawodowe, skupiając się na osiągnięciach i umiejętnościach istotnych dla nowej roli
-       - Używaj konkretnych liczb i danych liczbowych do opisania osiągnięć
-       - Dodaj nowe, istotne szczegóły wynikające z opisanych doświadczeń
+    Kluczowe wytyczne optymalizacji:
+    1. Głęboka analiza i transformacja doświadczenia:
+       - Przeprowadź szczegółową analizę każdego stanowiska pod kątem wymagań nowej roli
+       - Zidentyfikuj i wyeksponuj transferowalne umiejętności
+       - Dodaj wymierzalne rezultaty i osiągnięcia (%, liczby, skala projektów)
+       - Użyj profesjonalnego, branżowego słownictwa charakterystycznego dla danego sektora
+       - Stwórz nowe opisy stanowisk wykorzystując słowa kluczowe z ogłoszenia
+    
+    2. Zaawansowana personalizacja:
+       - Dopasuj tone of voice do kultury firmy i branży
+       - Uwzględnij specyficzne technologie i metodologie wymienione w ogłoszeniu
+       - Dodaj sekcję highlight'ów dopasowaną do priorytetowych wymagań
+       - Stwórz spersonalizowane podsumowanie zawodowe podkreślające najważniejsze atuty
+    
+    3. Optymalizacja umiejętności i kompetencji:
+       - Podziel umiejętności na kategorie: techniczne, miękkie, branżowe
+       - Określ poziom zaawansowania w skali 1-5 dla kluczowych kompetencji
+       - Dodaj konkretne przykłady zastosowania każdej kluczowej umiejętności
+       - Uwzględnij certyfikaty i szkolenia istotne dla stanowiska
+    
+    4. Dostosowanie struktury i formatowania:
+       - Zastosuj przejrzystą, profesjonalną hierarchię informacji
+       - Użyj bullet pointów dla lepszej czytelności
+       - Zachowaj spójny format dat i opisów
+       - Zoptymalizuj pod kątem ATS używając standardowych nagłówków
+    
+    5. Elementy dodatkowe:
+       - Dodaj sekcję projektów specjalnych jeśli są istotne
+       - Uwzględnij osiągnięcia i wyróżnienia branżowe
+       - Dodaj linki do portfolio/projektów jeśli są dostępne
+       - Uwzględnij wolontariat lub działalność dodatkową wspierającą profil zawodowy
+    
+    WAŻNE ZASADY:
+    - Zachowaj pełną spójność z prawdą zawartą w oryginalnym CV
+    - Każda sekcja musi być napisana od nowa z fokusem na nowe stanowisko
+    - Używaj aktywnych czasowników i konkretnych przykładów
+    - Odpowiedz w tym samym języku co oryginalne CV
+    
+    DANE:
+    
+    Opis stanowiska:
+    {job_description}
+    
+    Oryginalne CV:
+    {cv_text}
+    
+    Zwróć tylko zoptymalizowane CV w formacie tekstowym, bez dodatkowych komentarzy.
+    """
     
     2. Dostosuj język i prezentację:
        - Użyj słów kluczowych i terminologii z opisu stanowiska
