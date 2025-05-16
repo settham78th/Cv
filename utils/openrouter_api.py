@@ -1,3 +1,4 @@
+
 import os
 import json
 import logging
@@ -112,41 +113,6 @@ def optimize_cv(cv_text, job_description):
     Zwróć tylko zoptymalizowane CV w formacie tekstowym, bez dodatkowych komentarzy.
     """
     
-    2. Dostosuj język i prezentację:
-       - Użyj słów kluczowych i terminologii z opisu stanowiska"""
-    
-    return send_api_request(prompt, max_tokens=2500)
-       - Zastosuj mocne czasowniki opisujące działania
-       - Stwórz nowe, ukierunkowane podsumowanie zawodowe
-    
-    3. Rozbuduj sekcję umiejętności:
-       - Pogrupuj umiejętności w logiczne kategorie
-       - Dodaj poziomy zaawansowania
-       - Wyeksponuj umiejętności kluczowe dla stanowiska
-    
-    4. Dodaj nowe sekcje jeśli są istotne:
-       - Certyfikaty i szkolenia powiązane ze stanowiskiem
-       - Projekty specjalne
-       - Osiągnięcia zawodowe
-    
-    5. Zoptymalizuj pod kątem ATS:
-       - Użyj standardowych nagłówków sekcji
-       - Zachowaj przejrzystą strukturę
-       - Zastosuj odpowiednie formatowanie
-    
-    Pamiętaj: Każda sekcja powinna być napisana od nowa, z fokusem na dane stanowisko, a nie tylko lekko zmodyfikowana.
-    
-    WAŻNE: Odpowiedz w tym samym języku co CV. Jeśli CV jest po polsku, odpowiedz po polsku. Jeśli CV jest po angielsku, odpowiedz po angielsku.
-    
-    Opis stanowiska pracy:
-    {job_description}
-    
-    Oryginalne CV:
-    {cv_text}
-    
-    Zwróć tylko ulepszone CV w formacie tekstowym. Nie dołączaj wyjaśnień ani innego tekstu.
-    """
-    
     return send_api_request(prompt, max_tokens=2500)
 
 def generate_recruiter_feedback(cv_text, job_description=""):
@@ -245,8 +211,6 @@ def suggest_alternative_careers(cv_text):
     5. Estimated effort to transition (low/medium/high)
     
     IMPORTANT: Respond in the same language as the CV. If the CV is in Polish, respond in Polish. If the CV is in English, respond in English.
-    
-    Suggest at least 3 alternative career paths that leverage the person's existing skills but might be in different industries or roles.
     
     CV:
     {cv_text}
