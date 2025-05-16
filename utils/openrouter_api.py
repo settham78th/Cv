@@ -250,7 +250,7 @@ def generate_multi_versions(cv_text, roles):
 
 def analyze_job_url(url):
     """
-    Extract job description from a URL
+    Extract job description from a URL with improved handling for popular job sites
     """
     try:
         logger.debug(f"Analyzing job URL: {url}")
@@ -270,23 +270,70 @@ def analyze_job_url(url):
         soup = BeautifulSoup(response.text, 'html.parser')
         
         # Try to find the job description
-        # This is a simplified approach - different job sites have different structures
         job_text = ""
+        domain = parsed_url.netloc.lower()
         
-        # Look for common containers for job descriptions
-        potential_containers = soup.select('.job-description, .description, .details, article, [class*=job], [class*=description]')
-        if potential_containers:
-            for container in potential_containers:
-                container_text = container.get_text(separator=' ', strip=True)
-                if len(container_text) > len(job_text):
-                    job_text = container_text
+        # Enhanced site-specific extraction for popular job boards
+        if 'linkedin.com' in domain:
+            containers = soup.select('.description__text, .show-more-less-html, .jobs-description__content')
+            if containers:
+                job_text = containers[0].get_text(separator='\n', strip=True)
+                
+        elif 'indeed.com' in domain:
+            container = soup.select_one('#jobDescriptionText')
+            if container:
+                job_text = container.get_text(separator='\n', strip=True)
+                
+        elif 'pracuj.pl' in domain:
+            containers = soup.select('[data-test="section-benefit-expectations-text"], [data-test="section-description-text"]')
+            if containers:
+                job_text = '\n'.join([c.get_text(separator='\n', strip=True) for c in containers])
+                
+        elif 'olx.pl' in domain or 'praca.pl' in domain:
+            containers = soup.select('.offer-description, .offer-content, .description')
+            if containers:
+                job_text = containers[0].get_text(separator='\n', strip=True)
         
-        # If no container found, get the body text
-        if not job_text and soup.body:
-            job_text = soup.body.get_text(separator=' ', strip=True)
+        # If no specific site pattern matched, use generic approach
+        if not job_text:
+            # Look for common containers for job descriptions
+            potential_containers = soup.select('.job-description, .description, .details, article, .job-content, [class*=job], [class*=description], [class*=offer]')
+            if potential_containers:
+                # Get the longest container text as it's likely the main description
+                for container in potential_containers:
+                    container_text = container.get_text(separator='\n', strip=True)
+                    if len(container_text) > len(job_text):
+                        job_text = container_text
+            
+            # If still no container found, get the body text
+            if not job_text and soup.body:
+                # Remove navigation, header, footer and scripts
+                for tag in soup.select('nav, header, footer, script, style, iframe'):
+                    tag.decompose()
+                
+                job_text = soup.body.get_text(separator='\n', strip=True)
+                
+                # If body text is very long, try to extract the most relevant part
+                if len(job_text) > 10000:
+                    paragraphs = job_text.split('\n')
+                    # Look for paragraphs with keywords likely to be in job descriptions
+                    keywords = ['requirements', 'responsibilities', 'qualifications', 'skills', 'experience', 'about the job', 
+                                'wymagania', 'obowiązki', 'kwalifikacje', 'umiejętności', 'doświadczenie', 'o pracy']
+                    
+                    relevant_paragraphs = []
+                    found_relevant = False
+                    
+                    for paragraph in paragraphs:
+                        if any(keyword.lower() in paragraph.lower() for keyword in keywords):
+                            found_relevant = True
+                        if found_relevant and len(paragraph.strip()) > 50:  # Only include substantive paragraphs
+                            relevant_paragraphs.append(paragraph)
+                    
+                    if relevant_paragraphs:
+                        job_text = '\n'.join(relevant_paragraphs)
         
-        # Clean up the text
-        job_text = ' '.join(job_text.split())
+        # Clean up the text - remove excessive whitespace but preserve paragraph breaks
+        job_text = '\n'.join([' '.join(line.split()) for line in job_text.split('\n') if line.strip()])
         
         if not job_text:
             raise ValueError("Could not extract job description from the URL")
@@ -321,6 +368,7 @@ def summarize_job_description(job_text):
     3. Responsibilities and duties
     4. Preferred experience
     5. Any other important details (benefits, location, etc.)
+    6. TOP 5 keywords that are critically important for this position
     
     IMPORTANT: Detect the language of the job posting and respond in that same language.
     If the job posting is in Polish, respond in Polish.
@@ -330,6 +378,91 @@ def summarize_job_description(job_text):
     {job_text[:4000]}...
     
     Provide a concise but comprehensive summary of this job posting, focusing on information relevant for CV optimization.
+    Format the TOP 5 keywords as a separate section at the end labeled "KLUCZOWE SŁOWA:" (in Polish) or "KEY KEYWORDS:" (in English).
     """
     
     return send_api_request(prompt, max_tokens=1500)
+
+def analyze_market_trends(job_title, industry=""):
+    """
+    Analyze market trends and suggest popular skills/keywords for a specific job or industry
+    """
+    prompt = f"""
+    TASK: Przeprowadź analizę trendów rynkowych dla pozycji: {job_title} w branży: {industry if industry else "wszystkich branżach"}.
+    
+    Przygotuj następujące informacje:
+    1. TOP 10 najbardziej poszukiwanych umiejętności technicznych dla tej pozycji w 2025 roku
+    2. TOP 5 umiejętności miękkich cenionych przez pracodawców
+    3. Technologie/narzędzia wschodząće, które warto wymienić w CV
+    4. 3 najważniejsze certyfikaty lub szkolenia zwiększające wartość kandydata
+    5. Trendy płacowe - przedziały wynagrodzeń 
+    
+    Format odpowiedzi powinien być zwięzły, przejrzysty i łatwy do odczytania przez osobę szukającą pracy.
+    Jeśli nazwa stanowiska jest w języku angielskim, odpowiedz po angielsku. Jeśli w języku polskim - odpowiedz po polsku.
+    """
+    
+    return send_api_request(prompt, max_tokens=1500)
+
+def ats_optimization_check(cv_text, job_description=""):
+    """
+    Check CV against ATS (Applicant Tracking System) and provide suggestions for improvement
+    """
+    context = ""
+    if job_description:
+        context = f"Ogłoszenie o pracę dla odniesienia:\n{job_description[:2000]}"
+        
+    prompt = f"""
+    TASK: Sprawdź to CV pod kątem kompatybilności z systemami ATS (Applicant Tracking System) i oceń jego skuteczność.
+    
+    Przeprowadź następujące analizy:
+    1. Wykryj potencjalne problemy z formatowaniem, które mogą utrudnić odczyt przez systemy ATS
+    2. Sprawdź gęstość słów kluczowych i trafność ich wykorzystania
+    3. Oceń strukturę CV i zaproponuj ulepszenia dla lepszej czytelności maszynowej
+    4. Zidentyfikuj brakujące sekcje lub informacje, które są często wymagane przez ATS
+    5. Oceń ogólną skuteczność CV w systemach ATS w skali 1-10
+    
+    {context}
+    
+    CV do analizy:
+    {cv_text}
+    
+    Odpowiedz w tym samym języku co CV. Jeśli CV jest po polsku, odpowiedz po polsku.
+    Format odpowiedzi powinien być przejrzysty, z wyraźnie oznaczonymi sekcjami i konkretnymi sugestiami usprawnień.
+    """
+    
+    return send_api_request(prompt, max_tokens=1800)
+
+def generate_interview_questions(cv_text, job_description=""):
+    """
+    Generate likely interview questions based on CV and job description
+    """
+    context = ""
+    if job_description:
+        context = f"Uwzględnij poniższe ogłoszenie o pracę przy tworzeniu pytań:\n{job_description[:2000]}"
+        
+    prompt = f"""
+    TASK: Wygeneruj zestaw potencjalnych pytań rekrutacyjnych, które kandydat może otrzymać podczas rozmowy kwalifikacyjnej.
+    
+    Pytania powinny być:
+    1. Specyficzne dla doświadczenia i umiejętności kandydata wymienionych w CV
+    2. Dopasowane do stanowiska (jeśli podano opis stanowiska)
+    3. Zróżnicowane - połączenie pytań technicznych, behawioralnych i sytuacyjnych
+    4. Realistyczne i często zadawane przez rekruterów
+    
+    Uwzględnij po co najmniej 3 pytania z każdej kategorii:
+    - Pytania o doświadczenie zawodowe
+    - Pytania techniczne/o umiejętności
+    - Pytania behawioralne
+    - Pytania sytuacyjne
+    - Pytania o motywację i dopasowanie do firmy/stanowiska
+    
+    {context}
+    
+    CV:
+    {cv_text}
+    
+    Odpowiedz w tym samym języku co CV. Jeśli CV jest po polsku, odpowiedz po polsku.
+    Dodatkowo, do każdego pytania dodaj krótką wskazówkę, jak można by na nie odpowiedzieć w oparciu o informacje z CV.
+    """
+    
+    return send_api_request(prompt, max_tokens=2000)
