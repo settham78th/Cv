@@ -113,7 +113,9 @@ def optimize_cv(cv_text, job_description):
     """
     
     2. Dostosuj język i prezentację:
-       - Użyj słów kluczowych i terminologii z opisu stanowiska
+       - Użyj słów kluczowych i terminologii z opisu stanowiska"""
+    
+    return send_api_request(prompt, max_tokens=2500)
        - Zastosuj mocne czasowniki opisujące działania
        - Stwórz nowe, ukierunkowane podsumowanie zawodowe
     
