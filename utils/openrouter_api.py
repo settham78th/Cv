@@ -61,17 +61,35 @@ def optimize_cv(cv_text, job_description):
     Optimize a CV based on a job description
     """
     prompt = f"""
-    TASK: Ulepsz to CV, aby idealnie pasowało do podanego opisu stanowiska.
+    TASK: Stwórz nową, zoptymalizowaną wersję CV idealnie dopasowaną do podanego opisu stanowiska.
     
     Ważne wytyczne:
-    - ZACHOWAJ WSZYSTKIE INFORMACJE z oryginalnego CV - nie usuwaj żadnych doświadczeń, umiejętności czy osiągnięć
-    - Podkreśl i wyeksponuj doświadczenia, umiejętności i osiągnięcia, które są szczególnie istotne dla danego stanowiska
-    - Dostosuj słownictwo i terminy do słów kluczowych używanych w opisie stanowiska
-    - Dostosuj sekcję podsumowania zawodowego do wymagań stanowiska
-    - Upewnij się, że struktura CV jest przejrzysta i czytelna
-    - Zoptymalizuj CV pod kątem systemów ATS (Applicant Tracking System)
-    - Dodaj mocne, ukierunkowane na stanowisko podsumowanie zawodowe na początku CV
-    - Utrzymaj profesjonalny ton i styl
+    1. Wykorzystaj informacje z oryginalnego CV jako bazę danych o kandydacie, ale:
+       - Przepisz każde doświadczenie zawodowe, skupiając się na osiągnięciach i umiejętnościach istotnych dla nowej roli
+       - Używaj konkretnych liczb i danych liczbowych do opisania osiągnięć
+       - Dodaj nowe, istotne szczegóły wynikające z opisanych doświadczeń
+    
+    2. Dostosuj język i prezentację:
+       - Użyj słów kluczowych i terminologii z opisu stanowiska
+       - Zastosuj mocne czasowniki opisujące działania
+       - Stwórz nowe, ukierunkowane podsumowanie zawodowe
+    
+    3. Rozbuduj sekcję umiejętności:
+       - Pogrupuj umiejętności w logiczne kategorie
+       - Dodaj poziomy zaawansowania
+       - Wyeksponuj umiejętności kluczowe dla stanowiska
+    
+    4. Dodaj nowe sekcje jeśli są istotne:
+       - Certyfikaty i szkolenia powiązane ze stanowiskiem
+       - Projekty specjalne
+       - Osiągnięcia zawodowe
+    
+    5. Zoptymalizuj pod kątem ATS:
+       - Użyj standardowych nagłówków sekcji
+       - Zachowaj przejrzystą strukturę
+       - Zastosuj odpowiednie formatowanie
+    
+    Pamiętaj: Każda sekcja powinna być napisana od nowa, z fokusem na dane stanowisko, a nie tylko lekko zmodyfikowana.
     
     WAŻNE: Odpowiedz w tym samym języku co CV. Jeśli CV jest po polsku, odpowiedz po polsku. Jeśli CV jest po angielsku, odpowiedz po angielsku.
     
