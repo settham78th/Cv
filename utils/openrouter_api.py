@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 # Get API key from environment variables with fallback
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1/chat/completions"
-MODEL = "mistralai/mixtral-8x7b-instruct:free"  # More advanced model
+MODEL = "mistralai/mistral-small-3.1-24b-instruct:free"  # Darmowy model Mistral
 
 headers = {
     "Content-Type": "application/json",
