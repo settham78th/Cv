@@ -26,8 +26,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Options elements
     const optionInputs = document.querySelectorAll('input[name="optimization-option"]');
     const multiVersionsOption = document.getElementById('multi_versions');
+    const marketTrendsOption = document.getElementById('market_trends');
     const rolesContainer = document.getElementById('roles-container');
+    const marketTrendsContainer = document.getElementById('market-trends-container');
     const targetRolesInput = document.getElementById('target-roles');
+    const jobTitleInput = document.getElementById('job-title');
+    const industryInput = document.getElementById('industry');
     
     // Store CV text
     let cvText = '';
@@ -108,9 +112,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // For options that require a job description, check if one is provided
-        if ((selectedOption === 'optimize' || selectedOption === 'cover_letter' || selectedOption === 'feedback') 
+        if ((selectedOption === 'optimize' || selectedOption === 'cover_letter' || selectedOption === 'feedback' || 
+             selectedOption === 'ats_check' || selectedOption === 'interview_questions') 
             && !jobDescription && !jobUrl) {
             showError('Please provide a job description or URL for this option.');
+            return;
+        }
+        
+        // For market trends option, check if job title is provided
+        if (selectedOption === 'market_trends' && !jobTitleInput.value.trim()) {
+            showError('Please enter a job title for market trends analysis.');
             return;
         }
         
@@ -120,7 +131,9 @@ document.addEventListener('DOMContentLoaded', function() {
             job_description: jobDescription,
             job_url: jobUrl,
             selected_option: selectedOption,
-            roles: roles
+            roles: roles,
+            job_title: jobTitleInput.value.trim(),
+            industry: industryInput.value.trim()
         };
         
         // Show processing indicator and disable buttons
@@ -224,13 +237,18 @@ document.addEventListener('DOMContentLoaded', function() {
         );
     });
     
-    // Show roles input when multi_versions option is selected
+    // Show appropriate inputs based on selected option
     optionInputs.forEach(input => {
         input.addEventListener('change', function() {
+            // Hide all option-specific containers first
+            rolesContainer.style.display = 'none';
+            marketTrendsContainer.style.display = 'none';
+            
+            // Show the relevant container based on the option
             if (this.value === 'multi_versions') {
                 rolesContainer.style.display = 'block';
-            } else {
-                rolesContainer.style.display = 'none';
+            } else if (this.value === 'market_trends') {
+                marketTrendsContainer.style.display = 'block';
             }
         });
     });

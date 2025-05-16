@@ -114,11 +114,46 @@
                             <small class="d-block text-body-secondary">Create versions for different positions</small>
                         </span>
                     </label>
+                    
+                    <label class="list-group-item d-flex gap-2">
+                        <input class="form-check-input flex-shrink-0" type="radio" name="optimization-option" id="ats_check" value="ats_check">
+                        <span>
+                            <strong>🤖 ATS Compatibility Check</strong>
+                            <small class="d-block text-body-secondary">Analyze how well your CV will perform with ATS systems</small>
+                        </span>
+                    </label>
+                    
+                    <label class="list-group-item d-flex gap-2">
+                        <input class="form-check-input flex-shrink-0" type="radio" name="optimization-option" id="interview_questions" value="interview_questions">
+                        <span>
+                            <strong>🎯 Generate Interview Questions</strong>
+                            <small class="d-block text-body-secondary">Get potential questions based on your CV</small>
+                        </span>
+                    </label>
+                    
+                    <label class="list-group-item d-flex gap-2">
+                        <input class="form-check-input flex-shrink-0" type="radio" name="optimization-option" id="market_trends" value="market_trends">
+                        <span>
+                            <strong>📊 Market Trends Analysis</strong>
+                            <small class="d-block text-body-secondary">See skill demand and salary trends for your target role</small>
+                        </span>
+                    </label>
                 </div>
                 
                 <div id="roles-container" class="mt-3" style="display: none;">
                     <label class="form-label">Enter target roles (one per line):</label>
                     <textarea class="form-control" id="target-roles" rows="3" placeholder="Software Developer&#10;Project Manager&#10;Data Analyst"></textarea>
+                </div>
+                
+                <div id="market-trends-container" class="mt-3" style="display: none;">
+                    <div class="mb-3">
+                        <label class="form-label">Job Title/Position:</label>
+                        <input type="text" class="form-control" id="job-title" placeholder="e.g. Frontend Developer">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Industry (optional):</label>
+                        <input type="text" class="form-control" id="industry" placeholder="e.g. Finance, Healthcare">
+                    </div>
                 </div>
                 
                 <button id="process-button" class="btn btn-success w-100 mt-3" disabled>

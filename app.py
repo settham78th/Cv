@@ -12,7 +12,10 @@ from utils.openrouter_api import (
     translate_to_english,
     suggest_alternative_careers,
     generate_multi_versions,
-    analyze_job_url
+    analyze_job_url,
+    analyze_market_trends,
+    ats_optimization_check,
+    generate_interview_questions
 )
 
 # Configure logging
@@ -123,6 +126,9 @@ def process_cv():
     # Process according to selected option
     try:
         result = None
+        job_title = data.get('job_title', '')
+        industry = data.get('industry', '')
+        
         if selected_option == 'optimize':
             result = optimize_cv(cv_text, job_description)
         elif selected_option == 'feedback':
@@ -135,6 +141,12 @@ def process_cv():
             result = suggest_alternative_careers(cv_text)
         elif selected_option == 'multi_versions':
             result = generate_multi_versions(cv_text, roles)
+        elif selected_option == 'ats_check':
+            result = ats_optimization_check(cv_text, job_description)
+        elif selected_option == 'interview_questions':
+            result = generate_interview_questions(cv_text, job_description)
+        elif selected_option == 'market_trends':
+            result = analyze_market_trends(job_title, industry)
         else:
             return jsonify({
                 'success': False,
