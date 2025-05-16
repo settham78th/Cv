@@ -68,6 +68,8 @@ def optimize_cv(cv_text, job_description):
     - Optimize the structure and formatting
     - Remove irrelevant information
     
+    IMPORTANT: Respond in the same language as the CV. If the CV is in Polish, respond in Polish. If the CV is in English, respond in English.
+    
     Job description:
     {job_description}
     
@@ -99,6 +101,8 @@ def generate_recruiter_feedback(cv_text, job_description=""):
     6. Specific improvement suggestions
     7. Rating out of 10
     
+    IMPORTANT: Respond in the same language as the CV. If the CV is in Polish, respond in Polish. If the CV is in English, respond in English.
+    
     {context}
     
     CV:
@@ -122,6 +126,8 @@ def generate_cover_letter(cv_text, job_description):
     - Connect the candidate's background to the job requirements
     - Include a compelling introduction and conclusion
     - Be approximately 300-400 words
+    
+    IMPORTANT: Respond in the same language as the CV. If the CV is in Polish, respond in Polish. If the CV is in English, respond in English.
     
     Job description:
     {job_description}
@@ -170,6 +176,8 @@ def suggest_alternative_careers(cv_text):
     4. Potential industries or companies to target
     5. Estimated effort to transition (low/medium/high)
     
+    IMPORTANT: Respond in the same language as the CV. If the CV is in Polish, respond in Polish. If the CV is in English, respond in English.
+    
     Suggest at least 3 alternative career paths that leverage the person's existing skills but might be in different industries or roles.
     
     CV:
@@ -197,6 +205,8 @@ def generate_multi_versions(cv_text, roles):
     2. Customize the professional summary
     3. Adjust the emphasis of achievements
     4. Remove or downplay irrelevant information
+    
+    IMPORTANT: Respond in the same language as the CV. If the CV is in Polish, respond in Polish. If the CV is in English, respond in English.
     
     Original CV:
     {cv_text}
@@ -240,7 +250,7 @@ def analyze_job_url(url):
                     job_text = container_text
         
         # If no container found, get the body text
-        if not job_text:
+        if not job_text and soup.body:
             job_text = soup.body.get_text(separator=' ', strip=True)
         
         # Clean up the text
@@ -279,6 +289,10 @@ def summarize_job_description(job_text):
     3. Responsibilities and duties
     4. Preferred experience
     5. Any other important details (benefits, location, etc.)
+    
+    IMPORTANT: Detect the language of the job posting and respond in that same language.
+    If the job posting is in Polish, respond in Polish.
+    If the job posting is in English, respond in English.
     
     Job posting text:
     {job_text[:4000]}...
