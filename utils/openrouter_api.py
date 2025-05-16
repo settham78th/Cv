@@ -29,7 +29,7 @@ def send_api_request(prompt, max_tokens=2000):
     payload = {
         "model": MODEL,
         "messages": [
-            {"role": "system", "content": "You are an expert resume editor and career advisor."},
+            {"role": "system", "content": "You are an expert resume editor and career advisor. Always respond in the same language as the CV or job description provided by the user."},
             {"role": "user", "content": prompt}
         ],
         "max_tokens": max_tokens
