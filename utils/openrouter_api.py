@@ -61,22 +61,27 @@ def optimize_cv(cv_text, job_description):
     Optimize a CV based on a job description
     """
     prompt = f"""
-    TASK: Rewrite this CV to match the given job description.
-    - Highlight relevant skills and experiences
-    - Ensure it passes ATS (Applicant Tracking System)
-    - Add a professional summary
-    - Optimize the structure and formatting
-    - Remove irrelevant information
+    TASK: Ulepsz to CV, aby idealnie pasowało do podanego opisu stanowiska.
     
-    IMPORTANT: Respond in the same language as the CV. If the CV is in Polish, respond in Polish. If the CV is in English, respond in English.
+    Ważne wytyczne:
+    - ZACHOWAJ WSZYSTKIE INFORMACJE z oryginalnego CV - nie usuwaj żadnych doświadczeń, umiejętności czy osiągnięć
+    - Podkreśl i wyeksponuj doświadczenia, umiejętności i osiągnięcia, które są szczególnie istotne dla danego stanowiska
+    - Dostosuj słownictwo i terminy do słów kluczowych używanych w opisie stanowiska
+    - Dostosuj sekcję podsumowania zawodowego do wymagań stanowiska
+    - Upewnij się, że struktura CV jest przejrzysta i czytelna
+    - Zoptymalizuj CV pod kątem systemów ATS (Applicant Tracking System)
+    - Dodaj mocne, ukierunkowane na stanowisko podsumowanie zawodowe na początku CV
+    - Utrzymaj profesjonalny ton i styl
     
-    Job description:
+    WAŻNE: Odpowiedz w tym samym języku co CV. Jeśli CV jest po polsku, odpowiedz po polsku. Jeśli CV jest po angielsku, odpowiedz po angielsku.
+    
+    Opis stanowiska pracy:
     {job_description}
     
-    CV:
+    Oryginalne CV:
     {cv_text}
     
-    Return only the optimized CV in plain text format. Do not include explanations or other text.
+    Zwróć tylko ulepszone CV w formacie tekstowym. Nie dołączaj wyjaśnień ani innego tekstu.
     """
     
     return send_api_request(prompt, max_tokens=2500)
