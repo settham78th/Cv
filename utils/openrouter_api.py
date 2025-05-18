@@ -99,6 +99,75 @@ def detect_seniority_level(cv_text, job_description):
         logger.error(f"Error detecting seniority level: {str(e)}")
         return "mid"  # Domyślny poziom
 
+def detect_job_type(job_description):
+    """
+    Detect job type (physical, technical, office) based on job description
+    """
+    prompt = f"""
+    TASK: Określ typ pracy opisanej w ogłoszeniu o pracę.
+    
+    Możliwe typy pracy:
+    - "physical" - praca fizyczna (np. kierowca, magazynier, pracownik produkcji)
+    - "technical" - praca techniczna (np. mechanik, elektryk, technik)
+    - "office" - praca biurowa (np. administrator, asystent, koordynator)
+    - "professional" - praca specjalistyczna (np. lekarz, prawnik, nauczyciel)
+    - "creative" - praca kreatywna (np. grafik, projektant, artysta)
+    - "it" - praca w IT (np. programista, administrator sieci, analityk danych)
+    
+    Opis stanowiska:
+    {job_description[:2000]}...
+    
+    Odpowiedz tylko jednym słowem - kod typu pracy.
+    """
+    
+    try:
+        response = send_api_request(prompt, max_tokens=10)
+        response = response.strip().lower()
+        
+        valid_job_types = ["physical", "technical", "office", "professional", "creative", "it"]
+        
+        if response in valid_job_types:
+            return response
+        else:
+            # Domyślnie zwróć office jeśli odpowiedź jest nieprawidłowa
+            logger.warning(f"Invalid job type detected: {response}. Using 'office' as default.")
+            return "office"
+    except Exception as e:
+        logger.error(f"Error detecting job type: {str(e)}")
+        return "office"  # Domyślny typ pracy
+
+def detect_specific_role(job_description):
+    """
+    Detect specific job role based on job description
+    """
+    prompt = f"""
+    TASK: Określ konkretną rolę zawodową opisaną w ogłoszeniu o pracę.
+    
+    Wybierz jedną konkretną rolę, która najlepiej pasuje do opisu, na przykład:
+    - kierowca
+    - magazynier
+    - sprzedawca
+    - księgowy
+    - programista
+    - nauczyciel
+    - lekarz
+    - grafik
+    - mechanik
+    - inżynier
+    
+    Opis stanowiska:
+    {job_description[:2000]}...
+    
+    Odpowiedz tylko jednym słowem - nazwa konkretnej roli zawodowej, bez żadnych dodatkowych słów.
+    """
+    
+    try:
+        response = send_api_request(prompt, max_tokens=10)
+        return response.strip().lower()
+    except Exception as e:
+        logger.error(f"Error detecting specific role: {str(e)}")
+        return "specjalista"  # Domyślna rola
+
 def detect_industry(job_description):
     """
     Detect industry based on job description
@@ -114,6 +183,8 @@ def detect_industry(job_description):
     - "hr" - HR, rekrutacja, zasoby ludzkie
     - "education" - edukacja, szkolnictwo, e-learning
     - "engineering" - inżynieria, produkcja, budownictwo
+    - "transport" - transport, logistyka, spedycja
+    - "retail" - handel detaliczny, sprzedaż, obsługa klienta
     - "legal" - prawo, usługi prawne
     - "creative" - kreatywna, design, sztuka, UX/UI
     - "general" - inna branża lub brak wyraźnej specjalizacji
@@ -129,7 +200,8 @@ def detect_industry(job_description):
         response = response.strip().lower()
         
         valid_industries = ["it", "finance", "marketing", "healthcare", "hr", 
-                           "education", "engineering", "legal", "creative", "general"]
+                           "education", "engineering", "transport", "retail",
+                           "legal", "creative", "general"]
         
         if response in valid_industries:
             return response
@@ -141,9 +213,274 @@ def detect_industry(job_description):
         logger.error(f"Error detecting industry: {str(e)}")
         return "general"  # Domyślna branża
 
-def get_industry_specific_prompt(industry, seniority):
+def get_role_specific_competencies(role):
     """
-    Get industry-specific prompt guidance
+    Get role-specific competencies, certifications and typical achievements
+    """
+    role_competencies = {
+        "kierowca": {
+            "certifications": [
+                "Prawo jazdy kategorii B/C/C+E/D",
+                "Karta kierowcy",
+                "Świadectwo kwalifikacji zawodowej",
+                "Zaświadczenie o niekaralności",
+                "Certyfikat ADR (przewóz materiałów niebezpiecznych)",
+                "Uprawnienia HDS (hydrauliczny dźwig samochodowy)"
+            ],
+            "skills": [
+                "Znajomość przepisów ruchu drogowego",
+                "Obsługa tachografu cyfrowego",
+                "Planowanie optymalnych tras",
+                "Dbałość o stan techniczny pojazdu",
+                "Zabezpieczanie ładunku",
+                "Prowadzenie dokumentacji transportowej",
+                "Obsługa GPS i systemów nawigacyjnych",
+                "Podstawowa znajomość mechaniki pojazdowej"
+            ],
+            "achievements": [
+                "Przejechanych X kilometrów bez wypadku",
+                "Utrzymanie zużycia paliwa X% poniżej średniej firmowej",
+                "Terminowość dostaw na poziomie X%",
+                "Skrócenie czasu dostawy o X% dzięki optymalizacji trasy",
+                "Bezbłędne prowadzenie dokumentacji przez X miesięcy",
+                "Realizacja X dostaw miesięcznie",
+                "Obsługa X stałych klientów z najwyższymi ocenami satysfakcji"
+            ],
+            "language_style": "Profesjonalny, konkretny, z naciskiem na bezpieczeństwo i odpowiedzialność"
+        },
+        "magazynier": {
+            "certifications": [
+                "Uprawnienia na wózki widłowe",
+                "Uprawnienia na suwnice",
+                "Certyfikat BHP",
+                "Uprawnienia do obsługi systemów WMS"
+            ],
+            "skills": [
+                "Obsługa skanerów i czytników kodów",
+                "Kompletacja zamówień",
+                "Inwentaryzacja",
+                "Obsługa systemów magazynowych (WMS)",
+                "Przyjmowanie i wydawanie towaru",
+                "Kontrola jakościowa produktów",
+                "Pakowanie i zabezpieczanie towaru"
+            ],
+            "achievements": [
+                "Zwiększenie wydajności kompletacji o X%",
+                "Zmniejszenie błędów w zamówieniach o X%",
+                "Wdrożenie usprawnień w procesie X, co skróciło czas o Y%",
+                "Bezbłędne przeprowadzenie X inwentaryzacji",
+                "Utrzymanie 100% dokładności w zarządzaniu zapasami przez X miesięcy",
+                "Obsługa X palet dziennie"
+            ],
+            "language_style": "Precyzyjny, operacyjny, podkreślający dokładność i efektywność"
+        },
+        "programista": {
+            "certifications": [
+                "Certyfikaty Microsoft/AWS/Google Cloud",
+                "Certyfikaty językowe (Java, Python)",
+                "Certyfikaty Agile/Scrum",
+                "Certyfikat ITIL",
+                "Certyfikat cyberbezpieczeństwa"
+            ],
+            "skills": [
+                "Znajomość technologii X, Y, Z",
+                "Tworzenie czystego, testowalnego kodu",
+                "Projektowanie architektury systemów",
+                "Testowanie i debugowanie aplikacji",
+                "Praca z systemami kontroli wersji",
+                "Współpraca w zespole programistycznym",
+                "Code review",
+                "Ciągła integracja/wdrażanie (CI/CD)"
+            ],
+            "achievements": [
+                "Optymalizacja wydajności systemu X o Y%",
+                "Skrócenie czasu ładowania aplikacji o X%",
+                "Zredukowanie liczby błędów o X% poprzez wdrożenie testów automatycznych",
+                "Wdrożenie X nowych funkcjonalności w ciągu Y miesięcy",
+                "Przeprowadzenie refaktoryzacji kodu, co zmniejszyło jego złożoność o X%",
+                "Stworzenie rozwiązania, które zaoszczędziło firmie X zł rocznie"
+            ],
+            "language_style": "Techniczny, analityczny, z wykorzystaniem specjalistycznej terminologii IT"
+        },
+        "sprzedawca": {
+            "certifications": [
+                "Certyfikat obsługi klienta",
+                "Certyfikat sprzedażowy",
+                "Uprawnienia do obsługi kasy fiskalnej",
+                "Certyfikat z technik negocjacji"
+            ],
+            "skills": [
+                "Profesjonalna obsługa klienta",
+                "Znajomość technik sprzedaży",
+                "Obsługa kasy fiskalnej i terminali płatniczych",
+                "Zarządzanie zapasami na półkach",
+                "Przygotowywanie ekspozycji produktów",
+                "Rozwiązywanie problemów klientów",
+                "Realizacja planów sprzedażowych"
+            ],
+            "achievements": [
+                "Przekroczenie celu sprzedażowego o X%",
+                "Zwiększenie średniej wartości koszyka o X%",
+                "Pozyskanie X nowych stałych klientów",
+                "Utrzymanie najwyższego wskaźnika satysfakcji klienta przez X miesięcy",
+                "Przeprowadzenie X skutecznych akcji promocyjnych",
+                "Wzrost sprzedaży w kategorii X o Y%"
+            ],
+            "language_style": "Nastawiony na klienta, entuzjastyczny, przekonujący"
+        }
+    }
+    
+    # Dodaj więcej ról w miarę potrzeb
+    
+    # Jeśli rola nie jest zdefiniowana, zwróć ogólne kompetencje
+    if role not in role_competencies:
+        return {
+            "certifications": ["Certyfikaty branżowe", "Szkolenia specjalistyczne"],
+            "skills": ["Umiejętności interpersonalne", "Organizacja pracy", "Rozwiązywanie problemów"],
+            "achievements": ["Przekroczenie celów o X%", "Optymalizacja procesów", "Realizacja projektów"],
+            "language_style": "Profesjonalny, rzeczowy, zorientowany na wyniki"
+        }
+    
+    return role_competencies[role]
+
+def get_job_type_template(job_type):
+    """
+    Get CV template guidance based on job type
+    """
+    templates = {
+        "physical": """
+    STRUKTURA CV DLA PRACY FIZYCZNEJ:
+    1. Dane kontaktowe na górze strony
+    2. Krótkie podsumowanie zawodowe (3-4 zdania)
+    3. Uprawnienia i certyfikaty (na pierwszym miejscu)
+    4. Doświadczenie zawodowe (konkretne dane liczbowe)
+    5. Wykształcenie i kursy (zwięźle)
+    6. Umiejętności techniczne i praktyczne (z podziałem na kategorie)
+    
+    FORMAT:
+    - Maksymalnie 1-2 strony
+    - Proste, czytelne formatowanie
+    - Wypunktowania zamiast długich paragrafów
+    - Podkreślenie uprawnień i kwalifikacji zawodowych
+    
+    STYL JĘZYKOWY:
+    - Konkretne, rzeczowe sformułowania
+    - Proste zdania bez żargonu
+    - Nacisk na praktyczne umiejętności
+    - Używanie czasowników czynnościowych (obsługiwałem, dostarczałem, naprawiałem)
+    """,
+        "technical": """
+    STRUKTURA CV DLA PRACY TECHNICZNEJ:
+    1. Dane kontaktowe i dane osobowe
+    2. Podsumowanie zawodowe z kluczowymi umiejętnościami
+    3. Kwalifikacje techniczne i uprawnienia
+    4. Doświadczenie zawodowe z konkretnymi projektami
+    5. Wykształcenie i specjalistyczne szkolenia
+    6. Umiejętności techniczne z poziomem zaawansowania
+    
+    FORMAT:
+    - 1-2 strony
+    - Przejrzyste sekcje z podtytułami
+    - Używanie tabel dla umiejętności technicznych
+    - Uwypuklenie certyfikatów i uprawnień
+    
+    STYL JĘZYKOWY:
+    - Precyzyjny, techniczny język
+    - Szczegółowy opis umiejętności
+    - Używanie branżowej terminologii
+    - Konkretne osiągnięcia z liczbami i parametrami
+    """,
+        "office": """
+    STRUKTURA CV DLA PRACY BIUROWEJ:
+    1. Dane kontaktowe i profesjonalny profil
+    2. Zwięzłe podsumowanie zawodowe
+    3. Doświadczenie zawodowe (chronologicznie)
+    4. Umiejętności biurowe i znajomość oprogramowania
+    5. Wykształcenie i kursy
+    6. Osiągnięcia i dodatkowe kwalifikacje
+    
+    FORMAT:
+    - 1-2 strony
+    - Eleganckie, czyste formatowanie
+    - Spójne czcionki i marginesy
+    - Umiarkowane używanie kolorów
+    
+    STYL JĘZYKOWY:
+    - Profesjonalny, biznesowy język
+    - Użycie czasowników biznesowych (koordynowałem, zarządzałem, analizowałem)
+    - Podkreślenie umiejętności organizacyjnych i komunikacyjnych
+    - Formalne, ale przystępne sformułowania
+    """,
+        "professional": """
+    STRUKTURA CV DLA PRACY SPECJALISTYCZNEJ:
+    1. Dane kontaktowe i profesjonalny profil
+    2. Podsumowanie ekspertyz i kluczowych kompetencji
+    3. Doświadczenie zawodowe z podkreśleniem osiągnięć
+    4. Wykształcenie, specjalizacje i certyfikacje
+    5. Publikacje, projekty badawcze lub specjalistyczne osiągnięcia
+    6. Umiejętności specjalistyczne i znajomość metodologii
+    
+    FORMAT:
+    - 2-3 strony
+    - Profesjonalne, uporządkowane formatowanie
+    - Możliwość dodania sekcji publikacji/projektów
+    - Hierarchiczna organizacja informacji
+    
+    STYL JĘZYKOWY:
+    - Zaawansowany, specjalistyczny język
+    - Terminologia branżowa na wysokim poziomie
+    - Podkreślenie ekspertyzy i autorytetu w dziedzinie
+    - Uwypuklenie wartości dodanej dla organizacji
+    """,
+        "creative": """
+    STRUKTURA CV DLA PRACY KREATYWNEJ:
+    1. Dane kontaktowe i link do portfolio
+    2. Kreatywne, wyróżniające się podsumowanie
+    3. Wybrane projekty i osiągnięcia (przed doświadczeniem)
+    4. Doświadczenie zawodowe
+    5. Umiejętności kreatywne i techniczne
+    6. Wykształcenie i rozwój kreatywny
+    
+    FORMAT:
+    - 1-2 strony, ale z wyróżniającym się designem
+    - Możliwość niestandardowego układu
+    - Elementy graficzne podkreślające kreatywność
+    - Więcej swobody w kolorach i formatowaniu
+    
+    STYL JĘZYKOWY:
+    - Dynamiczny, kreatywny język
+    - Balans między profesjonalizmem a kreatywnością
+    - Uwypuklenie procesów kreatywnych i wyników
+    - Unikalny, osobisty ton głosu
+    """,
+        "it": """
+    STRUKTURA CV DLA PRACY W IT:
+    1. Dane kontaktowe i linki (GitHub, LinkedIn)
+    2. Zwięzłe podsumowanie techniczne
+    3. Umiejętności techniczne pogrupowane według kategorii
+    4. Doświadczenie zawodowe z konkretnymi projektami
+    5. Wykształcenie i certyfikaty techniczne
+    6. Projekty osobiste i open source
+    
+    FORMAT:
+    - 1-2 strony
+    - Techniczne, przejrzyste formatowanie
+    - Tabele lub paski postępu dla umiejętności
+    - Elementy kodu/pseudokodu jako akcenty
+    
+    STYL JĘZYKOWY:
+    - Techniczny, precyzyjny język
+    - Używanie terminologii IT
+    - Konkretne metryki i rezultaty techniczne
+    - Podkreślenie znajomości technologii i rozwiązanych problemów
+    """
+    }
+    
+    return templates.get(job_type, templates["office"])
+
+def get_industry_specific_prompt(industry, seniority, job_type=None, specific_role=None):
+    """
+    Get industry-specific prompt guidance, enhanced with job type and role specifics
     """
     # Domyślne wskazówki dla ogólnej branży
     industry_guidance = """
@@ -205,6 +542,20 @@ def get_industry_specific_prompt(industry, seniority):
     - Uwzględnij optymalizacje procesów i oszczędności materiałowe/czasowe
     - Wyeksponuj umiejętność rozwiązywania złożonych problemów technicznych
     """,
+        "transport": """
+    - Zastosuj precyzyjny język transportowy i logistyczny
+    - Podkreśl znajomość przepisów transportowych i dokumentacji
+    - Uwzględnij konkretne dane dotyczące realizowanych tras, ładunków, kilometrażu
+    - Wyeksponuj znajomość procedur bezpieczeństwa i efektywności transportu
+    - Podkreśl osiągnięcia w zakresie terminowości i jakości dostaw
+    """,
+        "retail": """
+    - Użyj języka zorientowanego na klienta i sprzedaż
+    - Podaj konkretne wyniki sprzedażowe i wskaźniki KPI
+    - Wymień znajomość systemów kasowych i zarządzania zapasami
+    - Podkreśl umiejętności w zakresie merchandisingu i układania ekspozycji
+    - Uwzględnij osiągnięcia w zakresie obsługi klienta i rozwiązywania problemów
+    """,
         "legal": """
     - Zastosuj precyzyjny język prawniczy i formalny styl
     - Podkreśl znajomość konkretnych aktów prawnych i orzecznictwa
@@ -248,7 +599,46 @@ def get_industry_specific_prompt(industry, seniority):
     """
     }
     
-    return industry_guidance + "\n" + seniority_guidance.get(seniority, seniority_guidance["mid"])
+    # Dodaj wskazówki dotyczące typu pracy
+    job_type_guidance = ""
+    if job_type:
+        job_type_template = get_job_type_template(job_type)
+        job_type_guidance = f"\n\nWSKAZÓWKI DOTYCZĄCE TYPU PRACY ({job_type.upper()}):\n{job_type_template}"
+    
+    # Dodaj wskazówki dotyczące konkretnej roli
+    role_guidance = ""
+    if specific_role:
+        competencies = get_role_specific_competencies(specific_role)
+        
+        role_guidance = f"\n\nWYMAGANE KOMPETENCJE DLA ROLI: {specific_role.upper()}\n"
+        
+        # Certyfikaty i uprawnienia
+        role_guidance += "\nSugerowane certyfikaty i uprawnienia:\n"
+        for cert in competencies.get("certifications", []):
+            role_guidance += f"- {cert}\n"
+        
+        # Umiejętności
+        role_guidance += "\nKluczowe umiejętności dla tej roli:\n"
+        for skill in competencies.get("skills", []):
+            role_guidance += f"- {skill}\n"
+        
+        # Typowe osiągnięcia
+        role_guidance += "\nTypowe osiągnięcia w tej roli (zamień X, Y, Z na realne liczby):\n"
+        for achievement in competencies.get("achievements", []):
+            role_guidance += f"- {achievement}\n"
+        
+        # Styl języka
+        role_guidance += f"\nSugerowany styl języka: {competencies.get('language_style', 'Profesjonalny')}\n"
+    
+    result = industry_guidance + "\n" + seniority_guidance.get(seniority, seniority_guidance["mid"])
+    
+    # Dodaj dodatkowe wskazówki, jeśli są dostępne
+    if job_type_guidance:
+        result += job_type_guidance
+    if role_guidance:
+        result += role_guidance
+        
+    return result
 
 def get_measurable_achievements_prompt(seniority):
     """
@@ -359,20 +749,28 @@ def optimize_cv_with_keywords(cv_text, job_description, keywords_data=None):
             logger.error(f"Failed to extract keywords for CV optimization: {str(e)}")
             keywords_data = {}
     
-    # Wykryj poziom doświadczenia i branżę
+    # Wykryj poziom doświadczenia, branżę, typ pracy i konkretną rolę
     try:
         seniority = detect_seniority_level(cv_text, job_description)
         logger.info(f"Detected seniority level: {seniority}")
         
         industry = detect_industry(job_description)
         logger.info(f"Detected industry: {industry}")
+        
+        job_type = detect_job_type(job_description)
+        logger.info(f"Detected job type: {job_type}")
+        
+        specific_role = detect_specific_role(job_description)
+        logger.info(f"Detected specific role: {specific_role}")
     except Exception as e:
         logger.error(f"Error detecting context: {str(e)}")
         seniority = "mid"  # Domyślny poziom
         industry = "general"  # Domyślna branża
+        job_type = "office"  # Domyślny typ pracy
+        specific_role = "specjalista"  # Domyślna rola
     
-    # Pobierz specyficzne wytyczne dla branży i poziomu
-    industry_prompt = get_industry_specific_prompt(industry, seniority)
+    # Pobierz specyficzne wytyczne dla branży, poziomu, typu pracy i roli
+    industry_prompt = get_industry_specific_prompt(industry, seniority, job_type, specific_role)
     achievements_prompt = get_measurable_achievements_prompt(seniority)
     structural_prompt = get_structural_quality_control_prompt(seniority, industry)
     
@@ -410,11 +808,29 @@ def optimize_cv_with_keywords(cv_text, job_description, keywords_data=None):
                 
                 keyword_instructions += "\n"
     
+    # Pobierz szczegółowe informacje o kompetencjach dla danej roli
+    role_competencies = get_role_specific_competencies(specific_role)
+    
+    # Przygotuj sugestie dotyczące brakujących kompetencji
+    missing_competencies_suggestions = """
+    SUGESTIE DOTYCZĄCE POTENCJALNIE BRAKUJĄCYCH KOMPETENCJI:
+    Jeśli poniższe kompetencje nie występują w oryginalnym CV, a są istotne dla danej roli, umieść dodatkową sekcję
+    z sugestiami, które kandydat mógłby dodać jeśli je posiada:
+    """
+    
+    for cert in role_competencies.get("certifications", [])[:3]:  # Wybierz maksymalnie 3 najważniejsze
+        missing_competencies_suggestions += f"- {cert}\n"
+    
+    for skill in role_competencies.get("skills", [])[:3]:  # Wybierz maksymalnie 3 najważniejsze
+        missing_competencies_suggestions += f"- {skill}\n"
+    
     prompt = f"""
     TASK: Stwórz całkowicie nową, spersonalizowaną wersję CV precyzyjnie dopasowaną do wymagań stanowiska.
     
     Wykryty poziom doświadczenia: {seniority.upper()}
     Wykryta branża: {industry.upper()}
+    Wykryty typ pracy: {job_type.upper()}
+    Wykryta konkretna rola: {specific_role.upper()}
     
     Kluczowe wytyczne optymalizacji:
     1. Głęboka analiza i transformacja doświadczenia:
@@ -436,14 +852,22 @@ def optimize_cv_with_keywords(cv_text, job_description, keywords_data=None):
        - Dodaj konkretne przykłady zastosowania każdej kluczowej umiejętności
        - Uwzględnij certyfikaty i szkolenia istotne dla stanowiska
     
-    4. Wytyczne branżowo-specyficzne:
+    4. Spójność i logika danych:
+       - Sprawdź, czy daty są logiczne i zachowują ciągłość
+       - Upewnij się, że ścieżka kariery jest spójna (brak nielogicznych przeskoków)
+       - Zadbaj o realistyczne opisy osiągnięć (liczby, procenty)
+       - Dopasuj poziom stanowisk do wykrytego seniority
+    
+    5. Wytyczne branżowo-specyficzne i dotyczące roli:
     {industry_prompt}
     
-    5. Wytyczne odnośnie mierzalnych osiągnięć:
+    6. Wytyczne odnośnie mierzalnych osiągnięć:
     {achievements_prompt}
     
-    6. Wytyczne dotyczące struktury i jakości:
+    7. Wytyczne dotyczące struktury i jakości:
     {structural_prompt}
+    
+    8. {missing_competencies_suggestions}
     
     {keyword_instructions}
     
@@ -453,6 +877,7 @@ def optimize_cv_with_keywords(cv_text, job_description, keywords_data=None):
     - Używaj aktywnych czasowników i konkretnych przykładów
     - Odpowiedz w tym samym języku co oryginalne CV
     - KONIECZNIE uwzględnij najważniejsze słowa kluczowe wymienione powyżej
+    - Stwórz CV w formacie odpowiednim dla wykrytego typu pracy i branży
     
     DANE:
     
