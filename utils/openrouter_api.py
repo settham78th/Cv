@@ -383,6 +383,116 @@ def summarize_job_description(job_text):
     
     return send_api_request(prompt, max_tokens=1500)
 
+def extract_keywords_from_job(job_description):
+    """
+    Extract key keywords from a job description for CV optimization
+    """
+    prompt = f"""
+    TASK: Przeanalizuj dokładnie ten opis stanowiska i wyodrębnij kluczowe słowa i umiejętności.
+    
+    Pogrupuj słowa kluczowe w następujące kategorie:
+    1. Umiejętności techniczne (8-12 słów)
+    2. Wymagane doświadczenie (3-5 słów)
+    3. Cechy osobowości (3-5 słów)
+    4. Kluczowe obowiązki (4-6 słów)
+    5. Branżowe terminy (4-6 słów)
+    
+    Każde słowo kluczowe powinno być pojedynczym wyrazem lub krótkim wyrażeniem (max 3 słowa).
+    
+    Dodaj ocenę ważności (1-5) dla każdego słowa kluczowego.
+    
+    Opis stanowiska:
+    {job_description}
+    
+    Zwróć wyniki w formacie JSON:
+    {{
+        "umiejetnosci_techniczne": [
+            {{"slowo": "Python", "waga": 5}},
+            {{"slowo": "SQL", "waga": 4}},
+            ...
+        ],
+        "wymagane_doswiadczenie": [
+            {{"slowo": "5 lat w IT", "waga": 5}},
+            ...
+        ],
+        "cechy_osobowosci": [
+            {{"slowo": "Komunikatywność", "waga": 3}},
+            ...
+        ],
+        "kluczowe_obowiazki": [
+            {{"slowo": "Tworzenie raportów", "waga": 4}},
+            ...
+        ],
+        "branzowe_terminy": [
+            {{"slowo": "API", "waga": 4}},
+            ...
+        ]
+    }}
+    
+    WAŻNE: Odpowiedz wyłącznie w formacie JSON bez dodatkowych komentarzy.
+    """
+    
+    response = send_api_request(prompt, max_tokens=1500)
+    
+    try:
+        # Próba usunięcia znaczników kodu z odpowiedzi, jeśli istnieją
+        if "```json" in response:
+            response = response.split("```json")[1].split("```")[0].strip()
+        elif "```" in response:
+            response = response.split("```")[1].split("```")[0].strip()
+            
+        # Konwersja tekstu na obiekt JSON
+        keywords_data = json.loads(response)
+        return keywords_data
+    except (json.JSONDecodeError, IndexError) as e:
+        logger.error(f"Error parsing keywords response: {str(e)}")
+        raise Exception(f"Failed to parse keywords from job description: {str(e)}")
+
+def generate_keywords_html(keywords_data):
+    """
+    Generate HTML visualization for keywords from job description
+    """
+    html = """
+    <div class="keywords-container">
+        <h3>Słowa kluczowe znalezione w opisie stanowiska</h3>
+    """
+    
+    # Funkcja pomocnicza do generowania kolorów na podstawie wagi
+    def get_weight_color(weight):
+        if weight >= 5:
+            return "danger"  # Czerwony dla najważniejszych
+        elif weight >= 4:
+            return "warning"  # Pomarańczowy/żółty
+        elif weight >= 3:
+            return "success"  # Zielony
+        elif weight >= 2:
+            return "info"     # Niebieski
+        else:
+            return "secondary"  # Szary dla najmniej ważnych
+    
+    # Generowanie HTML dla każdej kategorii
+    for category, keywords in keywords_data.items():
+        category_name = category.replace("_", " ").title()
+        html += f'<div class="keyword-category mb-3"><h4>{category_name}</h4><div class="d-flex flex-wrap">'
+        
+        for keyword in keywords:
+            weight = keyword.get("waga", 3)
+            word = keyword.get("slowo", "")
+            color = get_weight_color(weight)
+            
+            html += f'<span class="badge bg-{color} m-1 p-2" data-weight="{weight}">{word}</span>'
+        
+        html += '</div></div>'
+    
+    html += """
+    <div class="mt-3">
+        <small class="text-muted">* Kolor wskazuje na wagę słowa kluczowego - ciemniejsze kolory oznaczają większe znaczenie</small>
+    </div>
+    </div>
+    """
+    
+    return html
+
 def analyze_market_trends(job_title, industry=""):
     """
     Analyze market trends and suggest popular skills/keywords for a specific job or industry

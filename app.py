@@ -15,7 +15,9 @@ from utils.openrouter_api import (
     analyze_job_url,
     analyze_market_trends,
     ats_optimization_check,
-    generate_interview_questions
+    generate_interview_questions,
+    extract_keywords_from_job,
+    generate_keywords_html
 )
 
 # Configure logging
