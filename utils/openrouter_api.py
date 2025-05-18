@@ -404,32 +404,27 @@ def extract_keywords_from_job(job_description):
     Opis stanowiska:
     {job_description}
     
-    Zwróć wyniki w formacie JSON:
+    Zwróć wyniki w formacie JSON DOKŁADNIE w takiej strukturze (bez zmian w nazwach pól):
     {{
         "umiejetnosci_techniczne": [
             {{"slowo": "Python", "waga": 5}},
-            {{"slowo": "SQL", "waga": 4}},
-            ...
+            {{"slowo": "SQL", "waga": 4}}
         ],
         "wymagane_doswiadczenie": [
-            {{"slowo": "5 lat w IT", "waga": 5}},
-            ...
+            {{"slowo": "5 lat w IT", "waga": 5}}
         ],
         "cechy_osobowosci": [
-            {{"slowo": "Komunikatywność", "waga": 3}},
-            ...
+            {{"slowo": "Komunikatywność", "waga": 3}}
         ],
         "kluczowe_obowiazki": [
-            {{"slowo": "Tworzenie raportów", "waga": 4}},
-            ...
+            {{"slowo": "Tworzenie raportów", "waga": 4}}
         ],
         "branzowe_terminy": [
-            {{"slowo": "API", "waga": 4}},
-            ...
+            {{"slowo": "API", "waga": 4}}
         ]
     }}
     
-    WAŻNE: Odpowiedz wyłącznie w formacie JSON bez dodatkowych komentarzy.
+    WAŻNE: Odpowiedz wyłącznie w formacie JSON bez dodatkowych komentarzy. Upewnij się, że Twoja odpowiedź może być bezpośrednio przekonwertowana do obiektu przez json.loads() bez żadnych modyfikacji.
     """
     
     response = send_api_request(prompt, max_tokens=1500)
@@ -440,13 +435,51 @@ def extract_keywords_from_job(job_description):
             response = response.split("```json")[1].split("```")[0].strip()
         elif "```" in response:
             response = response.split("```")[1].split("```")[0].strip()
+        
+        # Usunięcie ewentualnych komentarzy przed lub po JSON
+        import re
+        json_match = re.search(r'(\{.*\})', response, re.DOTALL)
+        if json_match:
+            response = json_match.group(1)
             
         # Konwersja tekstu na obiekt JSON
         keywords_data = json.loads(response)
+        
+        # Sprawdzenie czy struktura danych jest poprawna
+        required_keys = ["umiejetnosci_techniczne", "wymagane_doswiadczenie", "cechy_osobowosci", 
+                        "kluczowe_obowiazki", "branzowe_terminy"]
+        
+        for key in required_keys:
+            if key not in keywords_data:
+                # Jeśli brakuje któregoś klucza, dodaj pusty
+                keywords_data[key] = []
+                
+            # Upewnij się, że wszystkie elementy mają wymagane pola
+            fixed_items = []
+            for item in keywords_data[key]:
+                if isinstance(item, dict) and "slowo" in item and "waga" in item:
+                    fixed_items.append(item)
+                elif isinstance(item, dict) and "slowo" in item:
+                    # Jeśli brakuje wagi, dodaj domyślną
+                    item["waga"] = 3
+                    fixed_items.append(item)
+                elif isinstance(item, str):
+                    # Jeśli to po prostu string, zamień na odpowiedni format
+                    fixed_items.append({"slowo": item, "waga": 3})
+                    
+            keywords_data[key] = fixed_items
+                
         return keywords_data
     except (json.JSONDecodeError, IndexError) as e:
         logger.error(f"Error parsing keywords response: {str(e)}")
-        raise Exception(f"Failed to parse keywords from job description: {str(e)}")
+        # W przypadku błędu, zwróć podstawową strukturę z komunikatem błędu
+        return {
+            "umiejetnosci_techniczne": [{"slowo": "Błąd analizy - spróbuj ponownie", "waga": 3}],
+            "wymagane_doswiadczenie": [{"slowo": "Wystąpił problem podczas analizy", "waga": 3}],
+            "cechy_osobowosci": [{"slowo": "Spróbuj z krótszym opisem", "waga": 3}],
+            "kluczowe_obowiazki": [{"slowo": "Nie udało się wyodrębnić", "waga": 3}],
+            "branzowe_terminy": [{"slowo": f"Błąd: {str(e)[:30]}", "waga": 3}]
+        }
 
 def generate_keywords_html(keywords_data):
     """
@@ -476,8 +509,15 @@ def generate_keywords_html(keywords_data):
         html += f'<div class="keyword-category mb-3"><h4>{category_name}</h4><div class="d-flex flex-wrap">'
         
         for keyword in keywords:
-            weight = keyword.get("waga", 3)
-            word = keyword.get("slowo", "")
+            # Sprawdzenie czy keyword jest obiektem czy stringiem
+            if isinstance(keyword, dict):
+                weight = keyword.get("waga", 3)
+                word = keyword.get("slowo", "")
+            else:
+                # Jeśli to string, użyj go jako słowa z domyślną wagą
+                weight = 3
+                word = str(keyword)
+                
             color = get_weight_color(weight)
             
             html += f'<span class="badge bg-{color} m-1 p-2" data-weight="{weight}">{word}</span>'
