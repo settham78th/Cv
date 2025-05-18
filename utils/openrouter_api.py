@@ -21,7 +21,7 @@ headers = {
 
 def send_api_request(prompt, max_tokens=2000):
     """
-    Send a request to the OpenRouter API
+    Send a request to the OpenRouter API with improved error handling
     """
     if not OPENROUTER_API_KEY:
         logger.error("OpenRouter API key not found")
@@ -38,16 +38,17 @@ def send_api_request(prompt, max_tokens=2000):
     
     try:
         logger.debug(f"Sending request to OpenRouter API")
-        response = requests.post(OPENROUTER_BASE_URL, headers=headers, json=payload)
+        response = requests.post(OPENROUTER_BASE_URL, headers=headers, json=payload, timeout=30)
         response.raise_for_status()
         
         result = response.json()
         logger.debug(f"Received response from OpenRouter API")
         
-        if 'choices' in result and len(result['choices']) > 0:
-            return result['choices'][0]['message']['content']
-        else:
-            raise ValueError("Unexpected API response format")
+        if 'choices' in result and len(result['choices']) > 0 and 'message' in result['choices'][0]:
+            return result['choices'][0]['message'].get('content', '')
+        
+        logger.error(f"Unexpected API response format: {result}")
+        return ''
     
     except requests.exceptions.RequestException as e:
         logger.error(f"API request failed: {str(e)}")
@@ -87,12 +88,18 @@ def detect_seniority_level(cv_text, job_description):
     
     try:
         response = send_api_request(prompt, max_tokens=10)
+        if not response:
+            return "mid"
+            
         response = response.strip().lower()
-        
-        if response in ["junior", "mid", "senior"]:
-            return response
+        # Szukaj słów kluczowych w odpowiedzi
+        if "senior" in response:
+            return "senior"
+        elif "junior" in response:
+            return "junior"
+        elif "mid" in response or "regular" in response or "intermediate" in response:
+            return "mid"
         else:
-            # Domyślnie zwróć mid-level jeśli odpowiedź jest nieprawidłowa
             logger.warning(f"Invalid seniority level detected: {response}. Using 'mid' as default.")
             return "mid"
     except Exception as e:
