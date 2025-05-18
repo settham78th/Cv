@@ -1,212 +1,91 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card bg-dark">
-            <div class="card-body text-center">
-                <h1 class="card-title mb-4">CV Optimizer Pro</h1>
-                <p class="lead">Enhance your CV with AI-powered analysis and optimization</p>
-                <p>Upload your CV and choose from multiple optimization options to increase your chances of landing your dream job.</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row">
-    <!-- Left Column: Upload and Job Input -->
-    <div class="col-lg-5">
-        <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
-                <h3 class="mb-0"><i class="fas fa-upload me-2"></i>Upload Your CV</h3>
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary bg-gradient">
+                <h2 class="card-title mb-0 text-white">
+                    <i class="fas fa-brain me-2"></i>PDF Text Processor
+                </h2>
             </div>
             <div class="card-body">
-                <form id="cv-upload-form" enctype="multipart/form-data">
-                    <div class="mb-3">
-                        <label for="cv-file" class="form-label">Upload CV (PDF format)</label>
-                        <input type="file" class="form-control" id="cv-file" name="cv_file" accept=".pdf" required>
-                        <div class="form-text">Your CV will be processed securely and not stored permanently.</div>
+                <p class="lead">Upload a PDF file and let AI process the text for you.</p>
+                
+                <form action="{{ url_for('process_pdf') }}" method="POST" enctype="multipart/form-data" id="pdfForm">
+                    <div class="mb-4">
+                        <label for="pdf_file" class="form-label">Select PDF File</label>
+                        <div class="input-group mb-3">
+                            <input type="file" class="form-control" id="pdf_file" name="pdf_file" accept=".pdf" required>
+                            <label class="input-group-text" for="pdf_file"><i class="fas fa-file-pdf"></i></label>
+                        </div>
+                        <div class="form-text">Supported format: PDF only</div>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="fas fa-file-upload me-2"></i>Upload CV
-                    </button>
+                    
+                    <div class="mb-4">
+                        <label for="prompt" class="form-label">What would you like the AI to do with the text?</label>
+                        <select class="form-select mb-2" id="promptTemplate">
+                            <option value="">Choose a template or write your own...</option>
+                            <option value="Summarize the following text">Summarize</option>
+                            <option value="Extract key points from the following text">Extract key points</option>
+                            <option value="Analyze the sentiment of the following text">Analyze sentiment</option>
+                            <option value="Translate the following text to Spanish">Translate to Spanish</option>
+                            <option value="Explain the following text in simpler terms">Simplify</option>
+                        </select>
+                        <textarea class="form-control" id="prompt" name="prompt" rows="3" placeholder="Example: Summarize the following text">Summarize the following text</textarea>
+                        <div class="form-text">This will be sent as instructions to the AI along with the extracted text</div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                            <i class="fas fa-cogs me-2"></i>Process PDF
+                        </button>
+                    </div>
                 </form>
-                
-                <div id="upload-success" class="alert alert-success mt-3" style="display: none;">
-                    <i class="fas fa-check-circle me-2"></i> CV uploaded successfully!
-                </div>
-                
-                <div id="upload-error" class="alert alert-danger mt-3" style="display: none;">
-                    <i class="fas fa-exclamation-circle me-2"></i>
-                    <span id="error-message">Error uploading CV</span>
+            </div>
+            <div class="card-footer bg-dark">
+                <div class="small text-muted">
+                    <i class="fas fa-info-circle me-1"></i>
+                    This tool extracts text from PDFs and processes it with OpenRouter AI to provide insights, summaries, and more.
                 </div>
             </div>
         </div>
         
-        <div class="card mb-4">
-            <div class="card-header bg-info text-white">
-                <h3 class="mb-0"><i class="fas fa-briefcase me-2"></i>Job Information</h3>
+        <!-- Processing spinner (hidden by default) -->
+        <div id="processingSpinner" class="text-center my-4 d-none">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Processing...</span>
             </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <label for="job-description" class="form-label">Job Description</label>
-                    <textarea class="form-control" id="job-description" rows="6" placeholder="Paste the full job description here..."></textarea>
-                </div>
-                
-                <div class="mb-3">
-                    <label for="job-url" class="form-label">OR Job URL (Optional)</label>
-                    <input type="url" class="form-control" id="job-url" placeholder="https://example.com/job-posting">
-                    <div class="form-text">We'll extract the job details automatically from supported job sites.</div>
-                </div>
-            </div>
+            <p class="mt-2">Processing your PDF. This may take a moment...</p>
         </div>
         
-        <div class="card mb-4">
-            <div class="card-header bg-success text-white">
-                <h3 class="mb-0"><i class="fas fa-tools me-2"></i>Optimization Options</h3>
-            </div>
-            <div class="card-body">
-                <div class="list-group">
-                    <label class="list-group-item d-flex gap-2">
-                        <input class="form-check-input flex-shrink-0" type="radio" name="optimization-option" id="optimize" value="optimize" checked>
-                        <span>
-                            <strong>✅ Generate Improved CV</strong>
-                            <small class="d-block text-body-secondary">Optimize your CV for the target job position</small>
-                        </span>
-                    </label>
-                    
-                    <label class="list-group-item d-flex gap-2">
-                        <input class="form-check-input flex-shrink-0" type="radio" name="optimization-option" id="feedback" value="feedback">
-                        <span>
-                            <strong>📋 AI Recruiter Feedback</strong>
-                            <small class="d-block text-body-secondary">Get detailed feedback as if from a real recruiter</small>
-                        </span>
-                    </label>
-                    
-                    <label class="list-group-item d-flex gap-2">
-                        <input class="form-check-input flex-shrink-0" type="radio" name="optimization-option" id="cover_letter" value="cover_letter">
-                        <span>
-                            <strong>📝 Generate Cover Letter</strong>
-                            <small class="d-block text-body-secondary">Create a personalized cover letter for the job</small>
-                        </span>
-                    </label>
-                    
-                    <label class="list-group-item d-flex gap-2">
-                        <input class="form-check-input flex-shrink-0" type="radio" name="optimization-option" id="translate" value="translate">
-                        <span>
-                            <strong>🌍 Translate to English</strong>
-                            <small class="d-block text-body-secondary">Get a professional English version of your CV</small>
-                        </span>
-                    </label>
-                    
-                    <label class="list-group-item d-flex gap-2">
-                        <input class="form-check-input flex-shrink-0" type="radio" name="optimization-option" id="alternative_careers" value="alternative_careers">
-                        <span>
-                            <strong>🔍 Alternative Career Paths</strong>
-                            <small class="d-block text-body-secondary">Discover new career options based on your skills</small>
-                        </span>
-                    </label>
-                    
-                    <label class="list-group-item d-flex gap-2">
-                        <input class="form-check-input flex-shrink-0" type="radio" name="optimization-option" id="multi_versions" value="multi_versions">
-                        <span>
-                            <strong>🗂️ Multiple Role Versions</strong>
-                            <small class="d-block text-body-secondary">Create versions for different positions</small>
-                        </span>
-                    </label>
-                    
-                    <label class="list-group-item d-flex gap-2">
-                        <input class="form-check-input flex-shrink-0" type="radio" name="optimization-option" id="ats_check" value="ats_check">
-                        <span>
-                            <strong>🤖 ATS Compatibility Check</strong>
-                            <small class="d-block text-body-secondary">Analyze how well your CV will perform with ATS systems</small>
-                        </span>
-                    </label>
-                    
-                    <label class="list-group-item d-flex gap-2">
-                        <input class="form-check-input flex-shrink-0" type="radio" name="optimization-option" id="interview_questions" value="interview_questions">
-                        <span>
-                            <strong>🎯 Generate Interview Questions</strong>
-                            <small class="d-block text-body-secondary">Get potential questions based on your CV</small>
-                        </span>
-                    </label>
-                    
-                    <label class="list-group-item d-flex gap-2">
-                        <input class="form-check-input flex-shrink-0" type="radio" name="optimization-option" id="market_trends" value="market_trends">
-                        <span>
-                            <strong>📊 Market Trends Analysis</strong>
-                            <small class="d-block text-body-secondary">See skill demand and salary trends for your target role</small>
-                        </span>
-                    </label>
-                </div>
-                
-                <div id="roles-container" class="mt-3" style="display: none;">
-                    <label class="form-label">Enter target roles (one per line):</label>
-                    <textarea class="form-control" id="target-roles" rows="3" placeholder="Software Developer&#10;Project Manager&#10;Data Analyst"></textarea>
-                </div>
-                
-                <div id="market-trends-container" class="mt-3" style="display: none;">
-                    <div class="mb-3">
-                        <label class="form-label">Job Title/Position:</label>
-                        <input type="text" class="form-control" id="job-title" placeholder="e.g. Frontend Developer">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Industry (optional):</label>
-                        <input type="text" class="form-control" id="industry" placeholder="e.g. Finance, Healthcare">
-                    </div>
-                </div>
-                
-                <button id="process-button" class="btn btn-success w-100 mt-3" disabled>
-                    <i class="fas fa-cogs me-2"></i>Process CV
-                </button>
-                
-                <div id="processing-indicator" class="text-center mt-3" style="display: none;">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <p class="mt-2">Processing your request with AI. This may take up to a minute...</p>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Right Column: CV Text and Results -->
-    <div class="col-lg-7">
-        <div class="card mb-4">
-            <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
-                <h3 class="mb-0"><i class="fas fa-file-alt me-2"></i>Your CV Text</h3>
-                <button id="edit-cv-btn" class="btn btn-outline-light btn-sm" disabled>
-                    <i class="fas fa-edit me-1"></i>Edit
-                </button>
-            </div>
-            <div class="card-body">
-                <div id="cv-preview">
-                    <p class="text-muted text-center">Upload your CV to see the extracted text here</p>
-                </div>
-                <div id="cv-editor" style="display: none;">
-                    <textarea class="form-control" id="cv-text-editor" rows="15"></textarea>
-                    <div class="d-flex justify-content-end mt-2">
-                        <button id="save-cv-btn" class="btn btn-primary">
-                            <i class="fas fa-save me-1"></i>Save Changes
-                        </button>
-                        <button id="cancel-edit-btn" class="btn btn-outline-secondary ms-2">
-                            <i class="fas fa-times me-1"></i>Cancel
-                        </button>
+        <!-- Features section -->
+        <div class="row mt-5">
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-file-alt fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">Text Extraction</h5>
+                        <p class="card-text">Extract text from PDF documents using advanced algorithms.</p>
                     </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="card mb-4">
-            <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
-                <h3 class="mb-0"><i class="fas fa-lightbulb me-2"></i>AI Results</h3>
-                <button id="copy-result-btn" class="btn btn-outline-light btn-sm" disabled>
-                    <i class="fas fa-copy me-1"></i>Copy
-                </button>
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-robot fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">AI Processing</h5>
+                        <p class="card-text">Process extracted text with OpenRouter AI for intelligent insights.</p>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                <div id="result-container">
-                    <p class="text-muted text-center">Process your CV to see AI-generated results here</p>
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-bolt fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">Fast Results</h5>
+                        <p class="card-text">Get quick results optimized for performance, even with large PDFs.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -214,8 +93,45 @@
 </div>
 {% endblock %}
 
-{% block extra_scripts %}
+{% block scripts %}
 <script>
-    // The main.js file will handle all the functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle prompt template selection
+        const promptTemplate = document.getElementById('promptTemplate');
+        const promptInput = document.getElementById('prompt');
+        
+        promptTemplate.addEventListener('change', function() {
+            if (this.value) {
+                promptInput.value = this.value;
+            }
+        });
+        
+        // Show processing spinner when form is submitted
+        const pdfForm = document.getElementById('pdfForm');
+        const processingSpinner = document.getElementById('processingSpinner');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        pdfForm.addEventListener('submit', function(e) {
+            // Validate file input
+            const fileInput = document.getElementById('pdf_file');
+            if (fileInput.files.length === 0) {
+                e.preventDefault();
+                alert('Please select a PDF file to upload');
+                return;
+            }
+            
+            // Check file type
+            const fileName = fileInput.files[0].name;
+            if (!fileName.toLowerCase().endsWith('.pdf')) {
+                e.preventDefault();
+                alert('Please upload a PDF file');
+                return;
+            }
+            
+            // Show spinner and disable button
+            processingSpinner.classList.remove('d-none');
+            submitBtn.disabled = true;
+        });
+    });
 </script>
 {% endblock %}
