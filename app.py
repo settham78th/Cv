@@ -168,5 +168,59 @@ def process_cv():
             'message': f"Error processing request: {str(e)}"
         }), 500
 
+@app.route('/keywords', methods=['GET', 'POST'])
+def keywords():
+    if request.method == 'POST':
+        job_description = request.form.get('job_description', '').strip()
+        
+        if not job_description:
+            flash('Proszę podać opis stanowiska', 'danger')
+            return render_template('keywords.html')
+        
+        try:
+            # Ekstrakcja słów kluczowych z opisu stanowiska
+            keywords_data = extract_keywords_from_job(job_description)
+            keywords_html = generate_keywords_html(keywords_data)
+            
+            return render_template('keywords_result.html', 
+                                  keywords_html=keywords_html,
+                                  job_description=job_description)
+            
+        except Exception as e:
+            logger.error(f"Error extracting keywords: {str(e)}", exc_info=True)
+            flash(f'Wystąpił błąd podczas analizy opisu stanowiska: {str(e)}', 'danger')
+            return render_template('keywords.html')
+    
+    return render_template('keywords.html')
+
+@app.route('/keywords-json', methods=['POST'])
+def keywords_json():
+    data = request.json
+    job_description = data.get('job_description', '')
+    
+    if not job_description:
+        return jsonify({
+            'success': False,
+            'message': 'Brak opisu stanowiska'
+        }), 400
+    
+    try:
+        # Ekstrakcja słów kluczowych z opisu stanowiska
+        keywords_data = extract_keywords_from_job(job_description)
+        keywords_html = generate_keywords_html(keywords_data)
+        
+        return jsonify({
+            'success': True,
+            'keywords_data': keywords_data,
+            'keywords_html': keywords_html
+        })
+    
+    except Exception as e:
+        logger.error(f"Error extracting keywords: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'message': f"Błąd podczas analizy opisu stanowiska: {str(e)}"
+        }), 500
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

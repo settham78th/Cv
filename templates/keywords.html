@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}Analiza słów kluczowych{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="mb-4">Analiza słów kluczowych z opisu stanowiska</h1>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+            {% endwith %}
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">Wprowadź opis stanowiska</h3>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">
+                        Ta funkcja automatycznie przeanalizuje opis stanowiska i wydobędzie najważniejsze słowa kluczowe, 
+                        które mogą pomóc w optymalizacji Twojego CV pod kątem tego stanowiska.
+                    </p>
+                    
+                    <form method="POST" action="{{ url_for('keywords') }}" id="keywords-form">
+                        <div class="mb-3">
+                            <label for="job_description" class="form-label">Opis stanowiska</label>
+                            <textarea class="form-control" id="job_description" name="job_description" rows="10" required
+                                placeholder="Wklej tutaj pełen opis stanowiska z ogłoszenia o pracę..."></textarea>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" class="btn btn-primary" id="analyze-btn">
+                                <span class="spinner-border spinner-border-sm d-none" id="loading-spinner" role="status" aria-hidden="true"></span>
+                                <span id="button-text">Analizuj słowa kluczowe</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">Jak to działa?</h3>
+                </div>
+                <div class="card-body">
+                    <p>Nasz system używa zaawansowanego algorytmu AI, który:</p>
+                    <ol>
+                        <li><strong>Analizuje</strong> pełen opis stanowiska</li>
+                        <li><strong>Identyfikuje</strong> najważniejsze umiejętności, doświadczenie i cechy</li>
+                        <li><strong>Kategoryzuje</strong> słowa kluczowe i przypisuje im poziom ważności</li>
+                        <li><strong>Wizualizuje</strong> wyniki w formie kolorowych etykiet dla łatwiejszego zrozumienia</li>
+                    </ol>
+                    
+                    <p class="font-weight-bold">Korzyści:</p>
+                    <ul>
+                        <li>Oszczędność czasu - natychmiastowa identyfikacja kluczowych terminów</li>
+                        <li>Optymalizacja CV - możliwość dopasowania CV do konkretnych słów kluczowych</li>
+                        <li>Lepsze przygotowanie do rozmowy kwalifikacyjnej</li>
+                        <li>Wyższa skuteczność w procesach rekrutacyjnych</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('keywords-form');
+    const analyzeBtn = document.getElementById('analyze-btn');
+    const spinner = document.getElementById('loading-spinner');
+    const buttonText = document.getElementById('button-text');
+    
+    if (form) {
+        form.addEventListener('submit', function() {
+            if (analyzeBtn && spinner && buttonText) {
+                analyzeBtn.disabled = true;
+                spinner.classList.remove('d-none');
+                buttonText.textContent = 'Analizowanie...';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block title %}Wyniki analizy słów kluczowych{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="mb-4">Wyniki analizy słów kluczowych</h1>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+            {% endwith %}
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-start mb-4">
+                <a href="{{ url_for('keywords') }}" class="btn btn-primary">
+                    <i class="bi bi-arrow-left-circle me-1"></i> Analizuj inny opis stanowiska
+                </a>
+                <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-house me-1"></i> Powrót do strony głównej
+                </a>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-12 mb-4">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h3 class="card-title mb-0">Znalezione słowa kluczowe</h3>
+                        </div>
+                        <div class="card-body">
+                            {{ keywords_html | safe }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-12 mb-4">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h3 class="card-title mb-0">Analizowany opis stanowiska</h3>
+                            <button class="btn btn-sm btn-outline-secondary copy-btn" data-target="job-description">
+                                <i class="bi bi-clipboard me-1"></i>Kopiuj
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <pre id="job-description" class="text-wrap job-description-text">{{ job_description }}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">Jak wykorzystać słowa kluczowe?</h3>
+                </div>
+                <div class="card-body">
+                    <p>Teraz, gdy masz już zidentyfikowane słowa kluczowe, możesz:</p>
+                    <ol>
+                        <li><strong>Zoptymalizować swoje CV</strong> - umieść najważniejsze słowa kluczowe (oznaczone na czerwono i pomarańczowo) w swoim CV, zwłaszcza w sekcji umiejętności i w opisach doświadczenia</li>
+                        <li><strong>Dostosować list motywacyjny</strong> - włącz te słowa kluczowe do swojego listu motywacyjnego, by pokazać dopasowanie do stanowiska</li>
+                        <li><strong>Przygotować się do rozmowy kwalifikacyjnej</strong> - zwróć szczególną uwagę na umiejętności i doświadczenie oznaczone jako wysokopriorytetowe</li>
+                        <li><strong>Sprawić, by Twoje CV przeszło przez systemy ATS</strong> - nowoczesne systemy rekrutacyjne automatycznie skanują CV w poszukiwaniu kluczowych słów</li>
+                    </ol>
+                    
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <strong>Wskazówka:</strong> Nie umieszczaj wszystkich słów kluczowych na siłę. Wybierz te, które autentycznie odzwierciedlają Twoje umiejętności i doświadczenie. Jakość zawsze przeważa nad ilością!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add copy functionality for the copy buttons
+    document.querySelectorAll('.copy-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const textElement = document.getElementById(targetId);
+            const text = textElement.innerText;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                // Change button text to indicate success
+                const originalContent = this.innerHTML;
+                this.innerHTML = '<i class="bi bi-check2 me-1"></i>Skopiowano!';
+                
+                // Reset button text after 2 seconds
+                setTimeout(() => {
+                    this.innerHTML = originalContent;
+                }, 2000);
+            }).catch(err => {
+                console.error('Could not copy text: ', err);
+            });
+        });
+    });
+});
+</script>
+{% endblock %}
