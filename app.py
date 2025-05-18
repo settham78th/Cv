@@ -7,6 +7,7 @@ import tempfile
 from utils.pdf_extraction import extract_text_from_pdf
 from utils.openrouter_api import (
     optimize_cv, 
+    optimize_cv_with_keywords,
     generate_recruiter_feedback,
     generate_cover_letter,
     translate_to_english,
@@ -182,6 +183,10 @@ def keywords():
             keywords_data = extract_keywords_from_job(job_description)
             keywords_html = generate_keywords_html(keywords_data)
             
+            # Zapisz opis stanowiska w sesji do późniejszego wykorzystania
+            session['job_description'] = job_description
+            session['keywords_data'] = keywords_data
+            
             return render_template('keywords_result.html', 
                                   keywords_html=keywords_html,
                                   job_description=job_description)
@@ -192,6 +197,35 @@ def keywords():
             return render_template('keywords.html')
     
     return render_template('keywords.html')
+
+@app.route('/optimize-with-keywords', methods=['POST'])
+def optimize_with_keywords():
+    cv_text = request.form.get('cv_text', '').strip()
+    job_description = session.get('job_description', '')
+    keywords_data = session.get('keywords_data', {})
+    
+    if not cv_text:
+        flash('Proszę podać treść CV', 'danger')
+        return redirect(url_for('keywords'))
+    
+    if not job_description:
+        flash('Brak opisu stanowiska. Proszę najpierw przeanalizować opis stanowiska.', 'danger')
+        return redirect(url_for('keywords'))
+    
+    try:
+        # Optymalizuj CV z uwzględnieniem słów kluczowych
+        optimized_cv = optimize_cv_with_keywords(cv_text, job_description, keywords_data)
+        
+        return render_template('optimized_cv.html',
+                              original_cv=cv_text,
+                              optimized_cv=optimized_cv,
+                              job_description=job_description,
+                              keywords_html=generate_keywords_html(keywords_data))
+    
+    except Exception as e:
+        logger.error(f"Error optimizing CV with keywords: {str(e)}", exc_info=True)
+        flash(f'Wystąpił błąd podczas optymalizacji CV: {str(e)}', 'danger')
+        return redirect(url_for('keywords'))
 
 @app.route('/keywords-json', methods=['POST'])
 def keywords_json():

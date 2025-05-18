@@ -57,10 +57,52 @@ def send_api_request(prompt, max_tokens=2000):
         logger.error(f"Error parsing API response: {str(e)}")
         raise Exception(f"Failed to parse OpenRouter API response: {str(e)}")
 
-def optimize_cv(cv_text, job_description):
+def optimize_cv_with_keywords(cv_text, job_description, keywords_data=None):
     """
-    Create an optimized version of CV using advanced AI processing
+    Create an optimized version of CV using advanced AI processing with focus on specific keywords
     """
+    # Jeśli nie podano słów kluczowych, spróbuj je wygenerować
+    if keywords_data is None:
+        try:
+            keywords_data = extract_keywords_from_job(job_description)
+        except Exception as e:
+            logger.error(f"Failed to extract keywords for CV optimization: {str(e)}")
+            keywords_data = {}
+    
+    # Przygotuj dodatkowe wytyczne na podstawie słów kluczowych
+    keyword_instructions = ""
+    
+    if keywords_data and isinstance(keywords_data, dict):
+        keyword_instructions = "KLUCZOWE SŁOWA, KTÓRE NALEŻY UWZGLĘDNIĆ:\n\n"
+        
+        # Dodaj wysokopriorytetowe słowa kluczowe
+        high_priority_keywords = []
+        
+        for category, words in keywords_data.items():
+            category_name = category.replace("_", " ").title()
+            for word in words:
+                if isinstance(word, dict) and "slowo" in word and "waga" in word:
+                    if word["waga"] >= 4:  # Wysoki priorytet
+                        high_priority_keywords.append(f"{word['slowo']} ({category_name})")
+        
+        if high_priority_keywords:
+            keyword_instructions += "Najważniejsze słowa kluczowe (koniecznie uwzględnij):\n"
+            for kw in high_priority_keywords:
+                keyword_instructions += f"- {kw}\n"
+            keyword_instructions += "\n"
+        
+        # Dodaj kategoryzowane słowa
+        for category, words in keywords_data.items():
+            if words:
+                category_name = category.replace("_", " ").title()
+                keyword_instructions += f"{category_name}:\n"
+                
+                for word in words:
+                    if isinstance(word, dict) and "slowo" in word:
+                        keyword_instructions += f"- {word['slowo']}\n"
+                
+                keyword_instructions += "\n"
+    
     prompt = f"""
     TASK: Stwórz całkowicie nową, spersonalizowaną wersję CV precyzyjnie dopasowaną do wymagań stanowiska.
     
@@ -96,11 +138,14 @@ def optimize_cv(cv_text, job_description):
        - Dodaj linki do portfolio/projektów jeśli są dostępne
        - Uwzględnij wolontariat lub działalność dodatkową wspierającą profil zawodowy
     
+    {keyword_instructions}
+    
     WAŻNE ZASADY:
     - Zachowaj pełną spójność z prawdą zawartą w oryginalnym CV
     - Każda sekcja musi być napisana od nowa z fokusem na nowe stanowisko
     - Używaj aktywnych czasowników i konkretnych przykładów
     - Odpowiedz w tym samym języku co oryginalne CV
+    - KONIECZNIE uwzględnij najważniejsze słowa kluczowe wymienione powyżej
     
     DANE:
     
@@ -114,6 +159,13 @@ def optimize_cv(cv_text, job_description):
     """
     
     return send_api_request(prompt, max_tokens=2500)
+
+def optimize_cv(cv_text, job_description):
+    """
+    Create an optimized version of CV using advanced AI processing
+    """
+    # Dla zachowania kompatybilności, wywołaj nową funkcję
+    return optimize_cv_with_keywords(cv_text, job_description)
 
 def generate_recruiter_feedback(cv_text, job_description=""):
     """

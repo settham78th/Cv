@@ -41,6 +41,33 @@
                 </div>
             </div>
             
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">Optymalizuj CV z wykorzystaniem słów kluczowych</h3>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">
+                        Teraz możesz wprowadzić swoje CV i automatycznie zoptymalizować je z uwzględnieniem znalezionych słów kluczowych.
+                        System inteligentnie wplecie zidentyfikowane kluczowe terminy do Twojego CV, zwiększając szanse na przejście przez systemy ATS.
+                    </p>
+                    
+                    <form method="POST" action="{{ url_for('optimize_with_keywords') }}" id="optimize-form">
+                        <div class="mb-3">
+                            <label for="cv_text" class="form-label">Wklej treść swojego CV</label>
+                            <textarea class="form-control" id="cv_text" name="cv_text" rows="10" required
+                                placeholder="Wklej tutaj aktualne CV, które chcesz zoptymalizować..."></textarea>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" class="btn btn-primary" id="optimize-btn">
+                                <span class="spinner-border spinner-border-sm d-none" id="loading-spinner-optimize" role="status" aria-hidden="true"></span>
+                                <span id="optimize-button-text"><i class="bi bi-magic me-1"></i>Optymalizuj CV</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
             <div class="row">
                 <div class="col-md-12 mb-4">
                     <div class="card">

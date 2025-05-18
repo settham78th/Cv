@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+
+{% block title %}CV Zoptymalizowane ze Słowami Kluczowymi{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="mb-4">CV Zoptymalizowane ze Słowami Kluczowymi</h1>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+            {% endwith %}
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-start mb-4">
+                <a href="{{ url_for('keywords') }}" class="btn btn-primary">
+                    <i class="bi bi-arrow-left-circle me-1"></i> Analizuj inne stanowisko
+                </a>
+                <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-house me-1"></i> Powrót do strony głównej
+                </a>
+            </div>
+            
+            <div class="alert alert-success">
+                <h4 class="alert-heading">Pomyślnie zoptymalizowano CV!</h4>
+                <p>Twoje CV zostało zoptymalizowane pod kątem wybranych słów kluczowych ze stanowiska. 
+                System inteligentnie wplótł te słowa w odpowiednie sekcje CV, zwiększając jego szanse na przejście przez systemy rekrutacyjne.</p>
+                <hr>
+                <p class="mb-0">Możesz teraz skopiować zoptymalizowane CV i wykorzystać je w swojej aplikacji.</p>
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h3 class="card-title mb-0">Wykorzystane słowa kluczowe</h3>
+                        </div>
+                        <div class="card-body">
+                            {{ keywords_html | safe }}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h3 class="card-title mb-0">Na podstawie opisu stanowiska</h3>
+                            <button class="btn btn-sm btn-outline-secondary copy-btn" data-target="job-description">
+                                <i class="bi bi-clipboard me-1"></i>Kopiuj
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <pre id="job-description" class="text-wrap job-description-text">{{ job_description }}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h3 class="card-title mb-0">Oryginalne CV</h3>
+                            <button class="btn btn-sm btn-outline-secondary copy-btn" data-target="original-cv">
+                                <i class="bi bi-clipboard me-1"></i>Kopiuj
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <pre id="original-cv" class="text-wrap cv-text">{{ original_cv }}</pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h3 class="card-title mb-0">Zoptymalizowane CV</h3>
+                            <button class="btn btn-sm btn-outline-secondary copy-btn" data-target="optimized-cv">
+                                <i class="bi bi-clipboard me-1"></i>Kopiuj
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <pre id="optimized-cv" class="text-wrap cv-text optimized-cv">{{ optimized_cv }}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">Jak wykorzystać zoptymalizowane CV?</h3>
+                </div>
+                <div class="card-body">
+                    <p>Twoje CV zostało zoptymalizowane pod kątem słów kluczowych ze stanowiska pracy. Co teraz?</p>
+                    <ol>
+                        <li><strong>Przejrzyj i dopasuj</strong> - sprawdź czy wszystkie informacje są zgodne z prawdą i dostosuj sformułowania jeśli to konieczne</li>
+                        <li><strong>Sformatuj profesjonalnie</strong> - skopiuj tekst do edytora tekstu i nadaj mu profesjonalny wygląd</li>
+                        <li><strong>Zapisz jako PDF</strong> - większość systemów ATS lepiej radzi sobie z plikami PDF</li>
+                        <li><strong>Sprawdź przed wysłaniem</strong> - upewnij się, że nie ma literówek i błędów formatowania</li>
+                    </ol>
+                    
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <strong>Wskazówka:</strong> Możesz również użyć tej samej analizy słów kluczowych do optymalizacji listu motywacyjnego!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add copy functionality for the copy buttons
+    document.querySelectorAll('.copy-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const textElement = document.getElementById(targetId);
+            const text = textElement.innerText;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                // Change button text to indicate success
+                const originalContent = this.innerHTML;
+                this.innerHTML = '<i class="bi bi-check2 me-1"></i>Skopiowano!';
+                
+                // Reset button text after 2 seconds
+                setTimeout(() => {
+                    this.innerHTML = originalContent;
+                }, 2000);
+            }).catch(err => {
+                console.error('Could not copy text: ', err);
+            });
+        });
+    });
+    
+    // Highlight keywords in optimized CV
+    try {
+        const optimizedCvElement = document.getElementById('optimized-cv');
+        if (optimizedCvElement) {
+            // Get all keywords from badges
+            const keywordBadges = document.querySelectorAll('.badge');
+            const keywords = [];
+            
+            keywordBadges.forEach(badge => {
+                const keyword = badge.textContent.trim();
+                if (keyword.length > 3) { // Ignore very short keywords
+                    keywords.push(keyword);
+                }
+            });
+            
+            // Sort keywords by length (longest first) to avoid partial matches
+            keywords.sort((a, b) => b.length - a.length);
+            
+            // Get CV text
+            let cvText = optimizedCvElement.innerHTML;
+            
+            // Replace keywords with highlighted versions
+            keywords.forEach(keyword => {
+                const regex = new RegExp(keyword, 'gi');
+                cvText = cvText.replace(regex, match => {
+                    return `<span class="keyword-highlight">${match}</span>`;
+                });
+            });
+            
+            // Set the modified HTML back
+            optimizedCvElement.innerHTML = cvText;
+        }
+    } catch (e) {
+        console.error('Error highlighting keywords:', e);
+    }
+});
+</script>
+
+<style>
+.cv-text {
+    max-height: 600px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    font-size: 0.9rem;
+}
+
+.optimized-cv .keyword-highlight {
+    background-color: rgba(255, 193, 7, 0.3);
+    border-radius: 2px;
+    padding: 1px 0;
+}
+
+.job-description-text {
+    max-height: 400px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    font-size: 0.9rem;
+}
+</style>
+{% endblock %}
