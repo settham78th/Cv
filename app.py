@@ -41,7 +41,13 @@ def allowed_file(filename):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    # Sprawdź, czy mamy zapisane słowa kluczowe w sesji
+    has_keywords = 'keywords_data' in session and session['keywords_data']
+    job_description = session.get('job_description', '')
+    
+    return render_template('index.html', 
+                          has_keywords=has_keywords,
+                          saved_job_description=job_description)
 
 @app.route('/upload-cv', methods=['POST'])
 def upload_cv():
@@ -126,6 +132,9 @@ def process_cv():
                 'message': f"Error extracting job description from URL: {str(e)}"
             }), 500
     
+    # Sprawdź, czy mamy zapisane słowa kluczowe w sesji
+    keywords_data = session.get('keywords_data', {})
+    
     # Process according to selected option
     try:
         result = None
@@ -133,7 +142,12 @@ def process_cv():
         industry = data.get('industry', '')
         
         if selected_option == 'optimize':
-            result = optimize_cv(cv_text, job_description)
+            # Jeśli mamy zapisane słowa kluczowe, użyj funkcji z nimi
+            if keywords_data and job_description:
+                logger.info("Using stored keywords data for CV optimization")
+                result = optimize_cv_with_keywords(cv_text, job_description, keywords_data)
+            else:
+                result = optimize_cv(cv_text, job_description)
         elif selected_option == 'feedback':
             result = generate_recruiter_feedback(cv_text, job_description)
         elif selected_option == 'cover_letter':
@@ -159,7 +173,8 @@ def process_cv():
         return jsonify({
             'success': True,
             'result': result,
-            'job_description': extracted_job_description if extracted_job_description else None
+            'job_description': extracted_job_description if extracted_job_description else None,
+            'used_keywords': True if keywords_data and selected_option == 'optimize' else False
         })
     
     except Exception as e:

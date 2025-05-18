@@ -13,6 +13,32 @@
     </div>
 </div>
 
+{% if has_keywords %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <div class="d-flex">
+                <div class="me-3">
+                    <i class="fas fa-magic fa-2x"></i>
+                </div>
+                <div>
+                    <h4 class="alert-heading">Zapamiętane słowa kluczowe są dostępne!</h4>
+                    <p>
+                        Wykryto zapisane słowa kluczowe z analizy opisu stanowiska. 
+                        Zostaną one automatycznie wykorzystane przy optymalizacji CV, aby zwiększyć Twoje szanse na przejście przez systemy ATS.
+                    </p>
+                    <hr>
+                    <p class="mb-0">
+                        <small>Optymalizacja CV będzie bazować na opisie stanowiska, który analizowałeś wcześniej.</small>
+                    </p>
+                </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <div class="row">
     <!-- Left Column: Upload and Job Input -->
     <div class="col-lg-5">
