@@ -57,6 +57,296 @@ def send_api_request(prompt, max_tokens=2000):
         logger.error(f"Error parsing API response: {str(e)}")
         raise Exception(f"Failed to parse OpenRouter API response: {str(e)}")
 
+def detect_seniority_level(cv_text, job_description):
+    """
+    Detect seniority level (junior, mid, senior) based on CV and job description
+    """
+    prompt = f"""
+    TASK: Określ poziom seniority (junior, mid, senior) na podstawie CV i opisu stanowiska.
+    
+    Wskazówki do analizy:
+    
+    1. Sprawdź lata doświadczenia w CV
+    2. Przeanalizuj poziom odpowiedzialności w poprzednich rolach
+    3. Oceń wymagania z opisu stanowiska
+    4. Porównaj umiejętności z CV z wymaganiami w opisie stanowiska
+    
+    Zwróć tylko jeden z poniższych poziomów:
+    - "junior" - dla początkujących specjalistów z doświadczeniem 0-2 lata
+    - "mid" - dla specjalistów z doświadczeniem 2-5 lat
+    - "senior" - dla ekspertów z doświadczeniem 5+ lat
+    
+    CV:
+    {cv_text[:2000]}...
+    
+    Opis stanowiska:
+    {job_description[:2000]}...
+    
+    Odpowiedz tylko jednym słowem: junior, mid lub senior.
+    """
+    
+    try:
+        response = send_api_request(prompt, max_tokens=10)
+        response = response.strip().lower()
+        
+        if response in ["junior", "mid", "senior"]:
+            return response
+        else:
+            # Domyślnie zwróć mid-level jeśli odpowiedź jest nieprawidłowa
+            logger.warning(f"Invalid seniority level detected: {response}. Using 'mid' as default.")
+            return "mid"
+    except Exception as e:
+        logger.error(f"Error detecting seniority level: {str(e)}")
+        return "mid"  # Domyślny poziom
+
+def detect_industry(job_description):
+    """
+    Detect industry based on job description
+    """
+    prompt = f"""
+    TASK: Określ branżę na podstawie opisu stanowiska.
+    
+    Możliwe branże:
+    - "it" - technologia, programowanie, analiza danych, IT
+    - "finance" - finanse, bankowość, księgowość, ubezpieczenia
+    - "marketing" - marketing, reklama, PR, social media
+    - "healthcare" - służba zdrowia, farmacja, medycyna
+    - "hr" - HR, rekrutacja, zasoby ludzkie
+    - "education" - edukacja, szkolnictwo, e-learning
+    - "engineering" - inżynieria, produkcja, budownictwo
+    - "legal" - prawo, usługi prawne
+    - "creative" - kreatywna, design, sztuka, UX/UI
+    - "general" - inna branża lub brak wyraźnej specjalizacji
+    
+    Opis stanowiska:
+    {job_description[:2000]}...
+    
+    Odpowiedz tylko jednym słowem - kod branży.
+    """
+    
+    try:
+        response = send_api_request(prompt, max_tokens=10)
+        response = response.strip().lower()
+        
+        valid_industries = ["it", "finance", "marketing", "healthcare", "hr", 
+                           "education", "engineering", "legal", "creative", "general"]
+        
+        if response in valid_industries:
+            return response
+        else:
+            # Domyślnie zwróć general jeśli odpowiedź jest nieprawidłowa
+            logger.warning(f"Invalid industry detected: {response}. Using 'general' as default.")
+            return "general"
+    except Exception as e:
+        logger.error(f"Error detecting industry: {str(e)}")
+        return "general"  # Domyślna branża
+
+def get_industry_specific_prompt(industry, seniority):
+    """
+    Get industry-specific prompt guidance
+    """
+    # Domyślne wskazówki dla ogólnej branży
+    industry_guidance = """
+    - Użyj uniwersalnego języka biznesowego
+    - Podkreśl umiejętności interpersonalne i adaptacyjne
+    - Skup się na osiągnięciach mierzalnych w różnych kontekstach
+    - Podkreśl znajomość standardowych narzędzi biznesowych
+    """
+    
+    # Branżowo-specyficzne wskazówki
+    industry_prompts = {
+        "it": """
+    - Użyj technicznych terminów branżowych i nazw technologii
+    - Wymień konkretne języki programowania, narzędzia, frameworki z określeniem poziomu biegłości
+    - Podkreśl umiejętność rozwiązywania złożonych problemów technicznych
+    - Uwzględnij metodyki wytwarzania oprogramowania (np. Agile, Scrum)
+    - Wykorzystaj mierzalne wskaźniki techniczne (optymalizacja wydajności, redukcja błędów)
+    - Uwzględnij projekty open source i repozytoria kodu (GitHub, GitLab)
+    """,
+        "finance": """
+    - Zastosuj precyzyjny język finansowy i terminologię branżową
+    - Podkreśl umiejętności analityczne i znajomość regulacji (np. MSSF, US GAAP)
+    - Uwzględnij konkretne wyniki finansowe i optymalizacje kosztów w procentach
+    - Wyeksponuj znajomość systemów finansowych i umiejętność analizy danych
+    - Podkreśl dokładność i dbałość o szczegóły w kontekście finansowym
+    """,
+        "marketing": """
+    - Użyj dynamicznego, kreatywnego języka z branżowym słownictwem marketingowym
+    - Podaj konkretne wyniki kampanii (ROI, conversion rate, zasięg)
+    - Wymień znajomość platform marketingowych i narzędzi analitycznych
+    - Podkreśl umiejętności w zakresie content marketingu i mediów społecznościowych
+    - Uwzględnij kreatywne projekty i case studies z mierzalnymi efektami
+    """,
+        "healthcare": """
+    - Zastosuj profesjonalną terminologię medyczną
+    - Podkreśl certyfikaty i uprawnienia branżowe
+    - Wyeksponuj znajomość procedur medycznych i regulacji (np. RODO w kontekście danych medycznych)
+    - Uwzględnij doświadczenie z konkretną aparaturą medyczną lub systemami opieki zdrowotnej
+    - Podkreśl umiejętności interpersonalne w kontekście opieki nad pacjentem
+    """,
+        "hr": """
+    - Zastosuj terminologię HR i zarządzania talentami
+    - Podaj konkretne dane dotyczące rekrutacji, retencji i rozwoju pracowników
+    - Podkreśl znajomość prawa pracy i systemów HR
+    - Uwzględnij zrealizowane projekty rozwojowe i ich wpływ na organizację
+    - Wyeksponuj umiejętności miękkie i komunikacyjne
+    """,
+        "education": """
+    - Użyj terminologii edukacyjnej i pedagogicznej
+    - Podkreśl certyfikaty nauczycielskie i metody edukacyjne
+    - Uwzględnij opracowane materiały dydaktyczne i programy nauczania
+    - Wyeksponuj mierzalne wyniki edukacyjne uczniów/studentów
+    - Podkreśl umiejętności dydaktyczne i zarządzania klasą/grupą
+    """,
+        "engineering": """
+    - Zastosuj precyzyjny język inżynieryjny i techniczny
+    - Wymień konkretne projekty inżynieryjne z parametrami technicznymi
+    - Podkreśl znajomość norm i standardów branżowych
+    - Uwzględnij optymalizacje procesów i oszczędności materiałowe/czasowe
+    - Wyeksponuj umiejętność rozwiązywania złożonych problemów technicznych
+    """,
+        "legal": """
+    - Zastosuj precyzyjny język prawniczy i formalny styl
+    - Podkreśl znajomość konkretnych aktów prawnych i orzecznictwa
+    - Uwzględnij prowadzone sprawy/projekty z zachowaniem poufności
+    - Wyeksponuj umiejętności analityczne i interpretacyjne
+    - Podkreśl certyfikaty i uprawnienia prawnicze
+    """,
+        "creative": """
+    - Użyj kreatywnego, dynamicznego języka
+    - Uwzględnij portfolio projektów kreatywnych z konkretnymi efektami
+    - Podkreśl znajomość narzędzi projektowych i technologii kreatywnych
+    - Wyeksponuj umiejętność pracy w zespołach interdyscyplinarnych
+    - Podkreśl nagrody i wyróżnienia w dziedzinach kreatywnych
+    """
+    }
+    
+    # Pobierz wskazówki dla konkretnej branży lub użyj domyślnych
+    if industry in industry_prompts:
+        industry_guidance = industry_prompts[industry]
+    
+    # Modyfikacje pod kątem seniority
+    seniority_guidance = {
+        "junior": """
+    - Podkreśl zapał do nauki i szybkiego przyswajania wiedzy
+    - Uwypuklij projekty szkolne/akademickie i ich praktyczne zastosowanie
+    - Skup się na potencjale i umiejętnościach podstawowych
+    - Pokaż gotowość do rozwoju pod mentorskim okiem
+    """,
+        "mid": """
+    - Zbalansuj doświadczenie z potencjałem rozwojowym
+    - Podkreśl samodzielnie zrealizowane projekty i ich efekty
+    - Uwypuklij specjalizacje i konkretne obszary ekspertyzy
+    - Pokaż umiejętność współpracy z różnymi interesariuszami
+    """,
+        "senior": """
+    - Uwypuklij strategiczne myślenie i szerszą perspektywę biznesową
+    - Podkreśl role przywódcze i mentorskie
+    - Skup się na długofalowych efektach i transformacyjnych projektach
+    - Pokaż umiejętność kierowania zespołami i zarządzania zasobami
+    - Uwzględnij wpływ na działalność biznesową i KPI organizacji
+    """
+    }
+    
+    return industry_guidance + "\n" + seniority_guidance.get(seniority, seniority_guidance["mid"])
+
+def get_measurable_achievements_prompt(seniority):
+    """
+    Get prompt to encourage adding measurable achievements based on seniority
+    """
+    prompts = {
+        "junior": """
+    Nawet dla juniora dodaj mierzalne osiągnięcia: 
+    - Jeśli brak konkretnych liczb w CV, dodaj przybliżone wyniki: "przygotowałem około 10 analiz", "wsparłem X projektów"
+    - Zamień ogólne stwierdzenia na konkretne: "nauczyłem się X technologii w ciągu 3 miesięcy"
+    - Uwzględnij efekty edukacyjne: "ukończyłem studia z wynikiem X% / w czołówce Y% studentów"
+    - Dodaj wyniki projektów studenckich/hobbyistycznych z konkretnymi liczbami
+    """,
+        "mid": """
+    Wzbogać CV o konkretne, mierzalne wyniki:
+    - Dodaj procenty poprawy procesów: "zwiększyłem wydajność o X%", "skróciłem czas realizacji o Y dni"
+    - Uwzględnij konkretne wskaźniki: "przeprowadziłem X kampanii", "wdrożyłem Y funkcjonalności"
+    - Zamień ogólniki na liczby: "zarządzałem 5-osobowym zespołem", "pozyskałem X nowych klientów"
+    - Dodaj skalę projektów: "projekt o budżecie X zł", "system dla Y użytkowników"
+    """,
+        "senior": """
+    Umieść strategiczne, biznesowe mierzalne osiągnięcia:
+    - Dodaj wskaźniki finansowe: "zwiększyłem przychody o X%", "zredukowałem koszty o Y zł"
+    - Uwzględnij wpływ na organizację: "wdrożyłem strategię, która zwiększyła rentowność o X%"
+    - Podkreśl efekty przywództwa: "kierowałem zespołem X osób, osiągając Y% wzrostu produktywności"
+    - Zamień każde ogólnikowe osiągnięcie na konkretne z liczbami, procentami i skalą czasową
+    - Uwzględnij wyniki transformacji: "przeprowadziłem restrukturyzację działu X, co przyniosło Y oszczędności"
+    """
+    }
+    
+    return prompts.get(seniority, prompts["mid"])
+
+def get_structural_quality_control_prompt(seniority, industry):
+    """
+    Get structural quality control prompt based on seniority and industry
+    """
+    base_prompt = """
+    Zapewnij optymalną strukturę CV:
+    - Akapity nie dłuższe niż 3-4 linijki tekstu
+    - Każde doświadczenie zawodowe opisane w 3-5 punktach
+    - Sekcja umiejętności podzielona na kategorie
+    - Zachowaj spójny format dla dat i lokalizacji
+    - Stosuj nagłówki w standardzie ATS
+    """
+    
+    industry_specific = {
+        "it": """
+    - Dodaj sekcję umiejętności technicznych na początku, kategoryzując je
+    - Dla każdej technologii określ poziom zaawansowania (%)
+    - Używaj wypunktowań dla osiągnięć technicznych (4-6 punktów na rolę)
+    - Skróć historię zawodową do najważniejszych technologicznie stanowisk
+    """,
+        "finance": """
+    - Użyj precyzyjnych nagłówków sekcji (np. "Doświadczenie w księgowości zarządczej")
+    - Każdy punkt osiągnięć powinien mieć aspekt ilościowy
+    - Struktura punktów: działanie, sposób, rezultat, skala
+    - Zachowaj formalny układ bez elementów kreatywnych
+    """,
+        "marketing": """
+    - Użyj kreatywnych, ale jasnych nagłówków sekcji
+    - Każde doświadczenie zawodowe opisz w 4-6 punktach
+    - Zrównoważ aspekty kreatywne i analityczne w punktach
+    - Dodaj sekcję z przykładami kampanii/projektów
+    """,
+        "creative": """
+    - Zastosuj przejrzysty układ podkreślający portfolio
+    - Punkty osiągnięć skup na efekcie i procesie kreatywnym
+    - Używaj dynamicznych czasowników na początku punktów
+    - Zrównoważ techniczne aspekty z kreatywnymi
+    """
+    }
+    
+    language_style = {
+        "junior": """
+    - Użyj prostego, bezpośredniego języka
+    - Stosuj podstawową terminologię branżową
+    - Unikaj zaawansowanego słownictwa
+    - Podkreślaj entuzjazm i potencjał
+    """,
+        "mid": """
+    - Zbalansuj profesjonalny język z przystępnością
+    - Stosuj branżowe terminy w kontekście
+    - Unikaj zbyt ogólnikowych stwierdzeń
+    - Zachowaj spójność stylu w całym dokumencie
+    """,
+        "senior": """
+    - Stosuj zaawansowany język biznesowy i branżowy
+    - Używaj precyzyjnych terminów strategicznych
+    - Podkreślaj aspekty przywódcze w stylu komunikacji
+    - Zachowaj profesjonalny, pewny siebie ton
+    """
+    }
+    
+    industry_guidance = industry_specific.get(industry, "")
+    style_guidance = language_style.get(seniority, language_style["mid"])
+    
+    return base_prompt + "\n" + industry_guidance + "\n" + style_guidance
+
 def optimize_cv_with_keywords(cv_text, job_description, keywords_data=None):
     """
     Create an optimized version of CV using advanced AI processing with focus on specific keywords
@@ -68,6 +358,23 @@ def optimize_cv_with_keywords(cv_text, job_description, keywords_data=None):
         except Exception as e:
             logger.error(f"Failed to extract keywords for CV optimization: {str(e)}")
             keywords_data = {}
+    
+    # Wykryj poziom doświadczenia i branżę
+    try:
+        seniority = detect_seniority_level(cv_text, job_description)
+        logger.info(f"Detected seniority level: {seniority}")
+        
+        industry = detect_industry(job_description)
+        logger.info(f"Detected industry: {industry}")
+    except Exception as e:
+        logger.error(f"Error detecting context: {str(e)}")
+        seniority = "mid"  # Domyślny poziom
+        industry = "general"  # Domyślna branża
+    
+    # Pobierz specyficzne wytyczne dla branży i poziomu
+    industry_prompt = get_industry_specific_prompt(industry, seniority)
+    achievements_prompt = get_measurable_achievements_prompt(seniority)
+    structural_prompt = get_structural_quality_control_prompt(seniority, industry)
     
     # Przygotuj dodatkowe wytyczne na podstawie słów kluczowych
     keyword_instructions = ""
@@ -106,6 +413,9 @@ def optimize_cv_with_keywords(cv_text, job_description, keywords_data=None):
     prompt = f"""
     TASK: Stwórz całkowicie nową, spersonalizowaną wersję CV precyzyjnie dopasowaną do wymagań stanowiska.
     
+    Wykryty poziom doświadczenia: {seniority.upper()}
+    Wykryta branża: {industry.upper()}
+    
     Kluczowe wytyczne optymalizacji:
     1. Głęboka analiza i transformacja doświadczenia:
        - Przeprowadź szczegółową analizę każdego stanowiska pod kątem wymagań nowej roli
@@ -126,17 +436,14 @@ def optimize_cv_with_keywords(cv_text, job_description, keywords_data=None):
        - Dodaj konkretne przykłady zastosowania każdej kluczowej umiejętności
        - Uwzględnij certyfikaty i szkolenia istotne dla stanowiska
     
-    4. Dostosowanie struktury i formatowania:
-       - Zastosuj przejrzystą, profesjonalną hierarchię informacji
-       - Użyj bullet pointów dla lepszej czytelności
-       - Zachowaj spójny format dat i opisów
-       - Zoptymalizuj pod kątem ATS używając standardowych nagłówków
+    4. Wytyczne branżowo-specyficzne:
+    {industry_prompt}
     
-    5. Elementy dodatkowe:
-       - Dodaj sekcję projektów specjalnych jeśli są istotne
-       - Uwzględnij osiągnięcia i wyróżnienia branżowe
-       - Dodaj linki do portfolio/projektów jeśli są dostępne
-       - Uwzględnij wolontariat lub działalność dodatkową wspierającą profil zawodowy
+    5. Wytyczne odnośnie mierzalnych osiągnięć:
+    {achievements_prompt}
+    
+    6. Wytyczne dotyczące struktury i jakości:
+    {structural_prompt}
     
     {keyword_instructions}
     
