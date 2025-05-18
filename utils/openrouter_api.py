@@ -37,8 +37,8 @@ def send_api_request(prompt, max_tokens=2000):
             "max_tokens": max_tokens,
             "temperature": 0.7
         }
-    
-    logger.debug(f"Sending request to OpenRouter API")
+        
+        logger.debug(f"Sending request to OpenRouter API")
         response = requests.post(OPENROUTER_BASE_URL, headers=headers, json=payload, timeout=60)
         
         if response.status_code != 200:
