@@ -740,6 +740,7 @@ def get_structural_quality_control_prompt(seniority, industry):
 def optimize_cv_with_keywords(cv_text, job_description, keywords_data=None):
     """
     Create an optimized version of CV using advanced AI processing with focus on specific keywords
+    and suggest missing skills and qualifications
     """
     # Jeśli nie podano słów kluczowych, spróbuj je wygenerować
     if keywords_data is None:
@@ -825,12 +826,26 @@ def optimize_cv_with_keywords(cv_text, job_description, keywords_data=None):
         missing_competencies_suggestions += f"- {skill}\n"
     
     prompt = f"""
-    TASK: Stwórz całkowicie nową, spersonalizowaną wersję CV precyzyjnie dopasowaną do wymagań stanowiska.
+    TASK: Stwórz całkowicie nową, spersonalizowaną wersję CV precyzyjnie dopasowaną do wymagań stanowiska, wraz z sugestiami dodatkowych umiejętności i kwalifikacji.
     
     Wykryty poziom doświadczenia: {seniority.upper()}
     Wykryta branża: {industry.upper()}
     Wykryty typ pracy: {job_type.upper()}
     Wykryta konkretna rola: {specific_role.upper()}
+    
+    ANALIZA BRAKUJĄCYCH ELEMENTÓW:
+    1. Przeanalizuj wymagania ze stanowiska i porównaj z obecnym CV
+    2. Zidentyfikuj brakujące umiejętności techniczne i miękkie
+    3. Zaproponuj dodatkowe kwalifikacje i certyfikaty
+    4. Sugeruj konkretne kursy i szkolenia do uzupełnienia
+    5. Wskaż obszary doświadczenia do rozwinięcia
+    
+    Format dla sugestii:
+    [SUGESTIE ROZWOJU]
+    - Umiejętności do zdobycia: (lista umiejętności z poziomem ważności)
+    - Rekomendowane certyfikaty: (lista certyfikatów)
+    - Sugerowane szkolenia: (lista szkoleń)
+    - Obszary do rozwoju: (konkretne aspekty doświadczenia)
     
     SZCZEGÓŁOWE WYTYCZNE DLA SEKCJI DOŚWIADCZENIA ZAWODOWEGO:
     
