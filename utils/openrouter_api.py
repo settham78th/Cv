@@ -21,34 +21,50 @@ headers = {
 
 def send_api_request(prompt, max_tokens=2000):
     """
-    Send a request to the OpenRouter API
+    Send a request to the OpenRouter API with improved error handling
     """
     if not OPENROUTER_API_KEY:
         logger.error("OpenRouter API key not found")
         raise ValueError("OpenRouter API key not set in environment variables")
     
-    payload = {
-        "model": MODEL,
-        "messages": [
-            {"role": "system", "content": "You are an expert resume editor and career advisor. Always respond in the same language as the CV or job description provided by the user."},
-            {"role": "user", "content": prompt}
-        ],
-        "max_tokens": max_tokens
-    }
-    
     try:
-        logger.debug(f"Sending request to OpenRouter API")
-        response = requests.post(OPENROUTER_BASE_URL, headers=headers, json=payload)
-        response.raise_for_status()
-        
-        result = response.json()
-        logger.debug(f"Received response from OpenRouter API")
-        
-        if 'choices' in result and len(result['choices']) > 0:
-            return result['choices'][0]['message']['content']
-        else:
-            raise ValueError("Unexpected API response format")
+        payload = {
+            "model": MODEL,
+            "messages": [
+                {"role": "system", "content": "You are an expert resume editor and career advisor. Always respond in the same language as the CV or job description provided by the user."},
+                {"role": "user", "content": prompt}
+            ],
+            "max_tokens": max_tokens,
+            "temperature": 0.7
+        }
     
+    logger.debug(f"Sending request to OpenRouter API")
+        response = requests.post(OPENROUTER_BASE_URL, headers=headers, json=payload, timeout=60)
+        
+        if response.status_code != 200:
+            error_msg = f"API request failed with status code {response.status_code}"
+            logger.error(error_msg)
+            if response.text:
+                logger.error(f"API error response: {response.text}")
+            raise Exception(error_msg)
+            
+        try:
+            result = response.json()
+            logger.debug(f"Received response from OpenRouter API: {result}")
+            
+            if 'choices' in result and len(result['choices']) > 0:
+                if 'message' in result['choices'][0] and 'content' in result['choices'][0]['message']:
+                    return result['choices'][0]['message']['content']
+                else:
+                    logger.error(f"Unexpected response structure: {result}")
+                    raise ValueError("Invalid response structure from API")
+            else:
+                raise ValueError("No choices in API response")
+                
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse API response: {str(e)}")
+            raise Exception(f"Invalid JSON response from API: {str(e)}")
+            
     except requests.exceptions.RequestException as e:
         logger.error(f"API request failed: {str(e)}")
         raise Exception(f"Failed to communicate with OpenRouter API: {str(e)}")
