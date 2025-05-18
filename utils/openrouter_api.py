@@ -832,6 +832,27 @@ def optimize_cv_with_keywords(cv_text, job_description, keywords_data=None):
     Wykryty typ pracy: {job_type.upper()}
     Wykryta konkretna rola: {specific_role.upper()}
     
+    SZCZEGÓŁOWE WYTYCZNE DLA SEKCJI DOŚWIADCZENIA ZAWODOWEGO:
+    
+    1. Format opisu stanowisk:
+       - Używaj mocnych czasowników akcji na początku każdego punktu
+       - Dodaj konkretne liczby i wyniki (%, wartości, skala)
+       - Podkreśl kluczowe osiągnięcia w każdej roli
+       - Zachowaj spójny format dla wszystkich pozycji
+    
+    2. Struktura każdego stanowiska:
+       - Nazwa stanowiska: Precyzyjna i zgodna z branżowymi standardami
+       - Firma: Pełna nazwa z krótkim opisem działalności
+       - Okres zatrudnienia: Format MM.RRRR - MM.RRRR
+       - 4-6 punktów opisujących obowiązki i osiągnięcia
+       - Każdy punkt powinien zawierać mierzalne rezultaty
+    
+    3. Optymalizacja treści:
+       - Dostosuj terminologię do branży i stanowiska
+       - Podkreśl umiejętności transferowalne
+       - Uwypuklij projekty i zadania najbardziej zbieżne z docelowym stanowiskiem
+       - Usuń nieistotne lub zbyt ogólne informacje
+    
     Kluczowe wytyczne optymalizacji:
     1. Głęboka analiza i transformacja doświadczenia:
        - Przeprowadź szczegółową analizę każdego stanowiska pod kątem wymagań nowej roli
