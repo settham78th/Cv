@@ -1,250 +1,76 @@
-{% extends 'base.html' %}
+{% extends "layout.html" %}
+
+{% block title %}Home{% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card bg-dark">
-            <div class="card-body text-center">
-                <h1 class="card-title mb-4">CV Optimizer Pro</h1>
-                <p class="lead">Enhance your CV with AI-powered analysis and optimization</p>
-                <p>Upload your CV and choose from multiple optimization options to increase your chances of landing your dream job.</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-{% if has_keywords %}
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <div class="d-flex">
-                <div class="me-3">
-                    <i class="fas fa-magic fa-2x"></i>
-                </div>
-                <div>
-                    <h4 class="alert-heading">Zapamiętane słowa kluczowe są dostępne!</h4>
-                    <p>
-                        Wykryto zapisane słowa kluczowe z analizy opisu stanowiska. 
-                        Zostaną one automatycznie wykorzystane przy optymalizacji CV, aby zwiększyć Twoje szanse na przejście przez systemy ATS.
-                    </p>
-                    <hr>
-                    <p class="mb-0">
-                        <small>Optymalizacja CV będzie bazować na opisie stanowiska, który analizowałeś wcześniej.</small>
-                    </p>
-                </div>
-            </div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    </div>
-</div>
-{% endif %}
-
-<div class="row">
-    <!-- Left Column: Upload and Job Input -->
-    <div class="col-lg-5">
-        <div class="card mb-4">
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
             <div class="card-header bg-primary text-white">
-                <h3 class="mb-0"><i class="fas fa-upload me-2"></i>Upload Your CV</h3>
+                <h2 class="mb-0">
+                    <i class="fas fa-file-upload me-2"></i> CV Analysis Tool
+                </h2>
             </div>
             <div class="card-body">
-                <form id="cv-upload-form" enctype="multipart/form-data">
-                    <div class="mb-3">
-                        <label for="cv-file" class="form-label">Upload CV (PDF format)</label>
-                        <input type="file" class="form-control" id="cv-file" name="cv_file" accept=".pdf" required>
-                        <div class="form-text">Your CV will be processed securely and not stored permanently.</div>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="fas fa-file-upload me-2"></i>Upload CV
-                    </button>
-                </form>
-                
-                <div id="upload-success" class="alert alert-success mt-3" style="display: none;">
-                    <i class="fas fa-check-circle me-2"></i> CV uploaded successfully!
+                <div class="text-center mb-4">
+                    <i class="fas fa-robot fa-4x mb-3 text-primary"></i>
+                    <h4>Upload your resume/CV for AI analysis</h4>
+                    <p class="text-muted">Our AI will analyze your CV and extract key job parameters</p>
                 </div>
-                
-                <div id="upload-error" class="alert alert-danger mt-3" style="display: none;">
-                    <i class="fas fa-exclamation-circle me-2"></i>
-                    <span id="error-message">Error uploading CV</span>
+
+                {% if error %}
+                <div class="alert alert-danger" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i> {{ error }}
                 </div>
-            </div>
-        </div>
-        
-        <div class="card mb-4">
-            <div class="card-header bg-info text-white">
-                <h3 class="mb-0"><i class="fas fa-briefcase me-2"></i>Job Information</h3>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <label for="job-description" class="form-label">Job Description</label>
-                    <textarea class="form-control" id="job-description" rows="6" placeholder="Paste the full job description here..."></textarea>
-                </div>
-                
-                <div class="mb-3">
-                    <label for="job-url" class="form-label">OR Job URL (Optional)</label>
-                    <input type="url" class="form-control" id="job-url" placeholder="https://example.com/job-posting">
-                    <div class="form-text">We'll extract the job details automatically from supported job sites.</div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="card mb-4">
-            <div class="card-header bg-success text-white">
-                <h3 class="mb-0"><i class="fas fa-tools me-2"></i>Optimization Options</h3>
-            </div>
-            <div class="card-body">
-                <div class="list-group">
-                    <label class="list-group-item d-flex gap-2">
-                        <input class="form-check-input flex-shrink-0" type="radio" name="optimization-option" id="optimize" value="optimize" checked>
-                        <span>
-                            <strong>✅ Generate Improved CV</strong>
-                            <small class="d-block text-body-secondary">Optimize your CV for the target job position</small>
-                        </span>
-                    </label>
-                    
-                    <label class="list-group-item d-flex gap-2">
-                        <input class="form-check-input flex-shrink-0" type="radio" name="optimization-option" id="feedback" value="feedback">
-                        <span>
-                            <strong>📋 AI Recruiter Feedback</strong>
-                            <small class="d-block text-body-secondary">Get detailed feedback as if from a real recruiter</small>
-                        </span>
-                    </label>
-                    
-                    <label class="list-group-item d-flex gap-2">
-                        <input class="form-check-input flex-shrink-0" type="radio" name="optimization-option" id="cover_letter" value="cover_letter">
-                        <span>
-                            <strong>📝 Generate Cover Letter</strong>
-                            <small class="d-block text-body-secondary">Create a personalized cover letter for the job</small>
-                        </span>
-                    </label>
-                    
-                    <label class="list-group-item d-flex gap-2">
-                        <input class="form-check-input flex-shrink-0" type="radio" name="optimization-option" id="translate" value="translate">
-                        <span>
-                            <strong>🌍 Translate to English</strong>
-                            <small class="d-block text-body-secondary">Get a professional English version of your CV</small>
-                        </span>
-                    </label>
-                    
-                    <label class="list-group-item d-flex gap-2">
-                        <input class="form-check-input flex-shrink-0" type="radio" name="optimization-option" id="alternative_careers" value="alternative_careers">
-                        <span>
-                            <strong>🔍 Alternative Career Paths</strong>
-                            <small class="d-block text-body-secondary">Discover new career options based on your skills</small>
-                        </span>
-                    </label>
-                    
-                    <label class="list-group-item d-flex gap-2">
-                        <input class="form-check-input flex-shrink-0" type="radio" name="optimization-option" id="multi_versions" value="multi_versions">
-                        <span>
-                            <strong>🗂️ Multiple Role Versions</strong>
-                            <small class="d-block text-body-secondary">Create versions for different positions</small>
-                        </span>
-                    </label>
-                    
-                    <label class="list-group-item d-flex gap-2">
-                        <input class="form-check-input flex-shrink-0" type="radio" name="optimization-option" id="ats_check" value="ats_check">
-                        <span>
-                            <strong>🤖 ATS Compatibility Check</strong>
-                            <small class="d-block text-body-secondary">Analyze how well your CV will perform with ATS systems</small>
-                        </span>
-                    </label>
-                    
-                    <label class="list-group-item d-flex gap-2">
-                        <input class="form-check-input flex-shrink-0" type="radio" name="optimization-option" id="interview_questions" value="interview_questions">
-                        <span>
-                            <strong>🎯 Generate Interview Questions</strong>
-                            <small class="d-block text-body-secondary">Get potential questions based on your CV</small>
-                        </span>
-                    </label>
-                    
-                    <label class="list-group-item d-flex gap-2">
-                        <input class="form-check-input flex-shrink-0" type="radio" name="optimization-option" id="market_trends" value="market_trends">
-                        <span>
-                            <strong>📊 Market Trends Analysis</strong>
-                            <small class="d-block text-body-secondary">See skill demand and salary trends for your target role</small>
-                        </span>
-                    </label>
-                </div>
-                
-                <div id="roles-container" class="mt-3" style="display: none;">
-                    <label class="form-label">Enter target roles (one per line):</label>
-                    <textarea class="form-control" id="target-roles" rows="3" placeholder="Software Developer&#10;Project Manager&#10;Data Analyst"></textarea>
-                </div>
-                
-                <div id="market-trends-container" class="mt-3" style="display: none;">
-                    <div class="mb-3">
-                        <label class="form-label">Job Title/Position:</label>
-                        <input type="text" class="form-control" id="job-title" placeholder="e.g. Frontend Developer">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Industry (optional):</label>
-                        <input type="text" class="form-control" id="industry" placeholder="e.g. Finance, Healthcare">
-                    </div>
-                </div>
-                
-                <button id="process-button" class="btn btn-success w-100 mt-3" disabled>
-                    <i class="fas fa-cogs me-2"></i>Process CV
-                </button>
-                
-                <div id="processing-indicator" class="text-center mt-3" style="display: none;">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <p class="mt-2">Processing your request with AI. This may take up to a minute...</p>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Right Column: CV Text and Results -->
-    <div class="col-lg-7">
-        <div class="card mb-4">
-            <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center" 
-                 style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#cv-content-container" aria-expanded="false">
-                <h3 class="mb-0">
-                    <i class="fas fa-file-alt me-2"></i>Your CV Text
-                    <small><i class="fas fa-chevron-down ms-2 collapse-icon"></i></small>
-                </h3>
-                <div>
-                    <span id="cv-uploaded-badge" class="badge bg-success me-2" style="display: none;">
-                        <i class="fas fa-check-circle me-1"></i>CV Uploaded
-                    </span>
-                    <button id="edit-cv-btn" class="btn btn-outline-light btn-sm" disabled
-                            onclick="event.stopPropagation();">
-                        <i class="fas fa-edit me-1"></i>Edit
-                    </button>
-                </div>
-            </div>
-            <div class="collapse" id="cv-content-container">
-                <div class="card-body">
-                    <div id="cv-preview">
-                        <p class="text-muted text-center">Upload your CV to see the extracted text here</p>
-                    </div>
-                    <div id="cv-editor" style="display: none;">
-                        <textarea class="form-control" id="cv-text-editor" rows="15"></textarea>
-                        <div class="d-flex justify-content-end mt-2">
-                            <button id="save-cv-btn" class="btn btn-primary">
-                                <i class="fas fa-save me-1"></i>Save Changes
-                            </button>
-                            <button id="cancel-edit-btn" class="btn btn-outline-secondary ms-2">
-                                <i class="fas fa-times me-1"></i>Cancel
-                            </button>
+                {% endif %}
+
+                <form action="{{ url_for('analyze') }}" method="post" enctype="multipart/form-data" id="uploadForm">
+                    <div class="mb-4">
+                        <div class="custom-file-upload">
+                            <label for="resume" class="form-label">Select a PDF file:</label>
+                            <input type="file" class="form-control" id="resume" name="resume" accept=".pdf" required>
+                            <small class="form-text text-muted">Max file size: 5MB</small>
                         </div>
                     </div>
-                </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg" id="analyzeBtn">
+                            <i class="fas fa-search me-2"></i> Analyze CV
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
-        
-        <div class="card mb-4">
-            <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
-                <h3 class="mb-0"><i class="fas fa-lightbulb me-2"></i>AI Results</h3>
-                <button id="copy-result-btn" class="btn btn-outline-light btn-sm" disabled>
-                    <i class="fas fa-copy me-1"></i>Copy
-                </button>
+
+        <div class="card mt-4 shadow-sm">
+            <div class="card-header bg-secondary text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i> How It Works
+                </h4>
             </div>
             <div class="card-body">
-                <div id="result-container">
-                    <p class="text-muted text-center">Process your CV to see AI-generated results here</p>
+                <div class="row">
+                    <div class="col-md-4 text-center mb-3 mb-md-0">
+                        <div class="p-3">
+                            <i class="fas fa-upload fa-2x mb-3 text-info"></i>
+                            <h5>1. Upload CV</h5>
+                            <p class="text-muted small">Upload your resume in PDF format</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center mb-3 mb-md-0">
+                        <div class="p-3">
+                            <i class="fas fa-cogs fa-2x mb-3 text-info"></i>
+                            <h5>2. AI Analysis</h5>
+                            <p class="text-muted small">Our AI extracts and analyzes the text</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="p-3">
+                            <i class="fas fa-chart-bar fa-2x mb-3 text-info"></i>
+                            <h5>3. Get Results</h5>
+                            <p class="text-muted small">Receive detailed job parameter analysis</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -252,8 +78,11 @@
 </div>
 {% endblock %}
 
-{% block extra_scripts %}
+{% block scripts %}
 <script>
-    // The main.js file will handle all the functionality
+    document.getElementById('uploadForm').addEventListener('submit', function() {
+        document.getElementById('analyzeBtn').innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Analyzing...';
+        document.getElementById('analyzeBtn').disabled = true;
+    });
 </script>
 {% endblock %}
