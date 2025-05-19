@@ -994,26 +994,31 @@ def generate_recruiter_feedback(cv_text, job_description=""):
     if job_description:
         context = f"Job description for context:\n{job_description}"
         
+    # Sprawdź czy CV jest w języku polskim
+    is_polish = len([word for word in ["jestem", "doświadczenie", "umiejętności", "wykształcenie", "praca", "stanowisko", "firma", "uniwersytet", "szkoła", "oraz", "język", "polski"] if word.lower() in cv_text.lower()]) > 3
+    
     prompt = f"""
-    TASK: You are an experienced professional recruiter. Review this CV and provide detailed, actionable feedback.
+    TASK: Jesteś doświadczonym rekruterem. Przeanalizuj to CV i dostarcz szczegółowej, praktycznej informacji zwrotnej.
     
-    Include:
-    1. Overall impression
-    2. Strengths and weaknesses
-    3. Formatting and structure assessment
-    4. Content quality evaluation
-    5. ATS compatibility
-    6. Specific improvement suggestions
-    7. Rating out of 10
+    {"UWAGA: TO CV JEST W JĘZYKU POLSKIM. ODPOWIEDZ KONIECZNIE PO POLSKU!" if is_polish else "This CV appears to be in English. Please respond in English."}
     
-    IMPORTANT: Respond in the same language as the CV. If the CV is in Polish, respond in Polish. If the CV is in English, respond in English.
+    Uwzględnij:
+    1. Ogólne wrażenie
+    2. Mocne i słabe strony
+    3. Ocena formatowania i struktury
+    4. Ocena jakości treści
+    5. Kompatybilność z systemami ATS
+    6. Konkretne sugestie ulepszeń
+    7. Ocena w skali 1-10
+    
+    BARDZO WAŻNE: Odpowiedz w tym samym języku co CV. Jeśli CV jest po polsku, odpowiedz po polsku. Jeśli CV jest po angielsku, odpowiedz po angielsku.
     
     {context}
     
     CV:
     {cv_text}
     
-    Provide detailed recruiter feedback. Be honest but constructive.
+    Dostarcz szczegółowej opinii rekrutera. Bądź szczery, ale konstruktywny.
     """
     
     return send_api_request(prompt, max_tokens=2000)
