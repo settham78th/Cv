@@ -883,32 +883,49 @@ def optimize_cv_with_keywords(cv_text, job_description, keywords_data=None):
     
     SZCZEGÓŁOWE WYTYCZNE DLA SEKCJI DOŚWIADCZENIA ZAWODOWEGO:
     
-    1. Format opisu stanowisk:
-       - Używaj mocnych czasowników akcji na początku każdego punktu
-       - Dodaj konkretne liczby i wyniki (%, wartości, skala)
-       - Podkreśl kluczowe osiągnięcia w każdej roli
-       - Zachowaj spójny format dla wszystkich pozycji
+    UWAGA: KONIECZNIE PRZEANALIZUJ I ZNACZĄCO ULEPSZ OPISY DOŚWIADCZENIA Z ORYGINALNEGO CV!
+    Nie kopiuj ich bezpośrednio, ale przekształć je w znaczący sposób, zachowując fakty i chronologię.
     
-    2. Struktura każdego stanowiska:
-       - Nazwa stanowiska: Precyzyjna i zgodna z branżowymi standardami
-       - Firma: Pełna nazwa z krótkim opisem działalności
-       - Okres zatrudnienia: Format MM.RRRR - MM.RRRR
-       - 4-6 punktów opisujących obowiązki i osiągnięcia
-       - Każdy punkt powinien zawierać mierzalne rezultaty
+    1. Transformacja opisów stanowisk:
+       - OBOWIĄZKOWO zacznij każdy punkt mocnym czasownikiem akcji (zarządzałem, wdrożyłem, zoptymalizowałem)
+       - DODAJ konkretne liczby i mierzalne wyniki (zwiększenie wydajności o X%, obsługa Y klientów)
+       - WYEKSPONUJ kluczowe osiągnięcia wyróżniające kandydata
+       - STWÓRZ całkowicie nowe, lepsze sformułowania dla każdego punktu z oryginalnego CV
     
-    3. Optymalizacja treści:
-       - Dostosuj terminologię do branży i stanowiska
-       - Podkreśl umiejętności transferowalne
-       - Uwypuklij projekty i zadania najbardziej zbieżne z docelowym stanowiskiem
-       - Usuń nieistotne lub zbyt ogólne informacje
+    2. Ulepszona struktura każdego stanowiska:
+       - **Nazwa stanowiska:** [Precyzyjna i zgodna z branżowymi standardami]
+       - **Firma:** [Pełna nazwa z krótkim opisem działalności]
+       - **Okres zatrudnienia:** [Format MM.RRRR - MM.RRRR]
+       - **Kluczowe obowiązki i osiągnięcia:**
+         • [Mocny czasownik + konkretne zadanie + mierzalny rezultat]
+         • [Mocny czasownik + konkretne zadanie + mierzalny rezultat]
+         • [Mocny czasownik + konkretne zadanie + mierzalny rezultat]
+    
+    3. Kompletna transformacja treści:
+       - CAŁKOWICIE PRZEPISZ ogólnikowe sformułowania z oryginalnego CV na konkretne i precyzyjne
+       - ZAMIEŃ pasywne opisy na aktywne sformułowania (np. zamiast "byłem odpowiedzialny za" użyj "zarządzałem")
+       - DODAJ branżowe słownictwo i terminologię zgodną z ogłoszeniem o pracę
+       - USUŃ zbędne, powtarzające się czy nieistotne informacje
+       - POŁĄCZ podobne punkty w jeden silniejszy, bardziej konkretny opis
+    
+    4. Przykłady transformacji doświadczenia (STOSUJ PODOBNE PODEJŚCIE):
+    
+       PRZED: "Odpowiadałem za obsługę klienta i realizację zamówień."
+       PO: "Obsłużyłem średnio 45 klientów dziennie, utrzymując 98% poziom satysfakcji i skracając czas realizacji zamówień o 15%."
+       
+       PRZED: "Kierowałem samochodem dostawczym."
+       PO: "Prowadziłem pojazd dostawczy klasy B, realizując 25-30 dostaw dziennie na terenie aglomeracji, utrzymując 100% terminowość i bezbłędną dokumentację transportową."
+       
+       PRZED: "Zajmowałem się organizacją magazynu."
+       PO: "Zreorganizowałem system magazynowy, wprowadzając oznaczenia kolorystyczne i strefowanie, co skróciło czas kompletacji zamówień o 22% i zmniejszyło liczbę błędów o 35%."
     
     Kluczowe wytyczne optymalizacji:
     1. Głęboka analiza i transformacja doświadczenia:
-       - Przeprowadź szczegółową analizę każdego stanowiska pod kątem wymagań nowej roli
-       - Zidentyfikuj i wyeksponuj transferowalne umiejętności
-       - Dodaj wymierzalne rezultaty i osiągnięcia (%, liczby, skala projektów)
-       - Użyj profesjonalnego, branżowego słownictwa charakterystycznego dla danego sektora
-       - Stwórz nowe opisy stanowisk wykorzystując słowa kluczowe z ogłoszenia
+       - OBOWIĄZKOWO przeprowadź szczegółową analizę każdego stanowiska z CV pod kątem wymagań nowej roli
+       - KONIECZNIE zidentyfikuj i wyeksponuj transferowalne umiejętności
+       - ZAWSZE dodawaj wymierzalne rezultaty i osiągnięcia (%, liczby, skala projektów)
+       - STOSUJ profesjonalne, branżowe słownictwo charakterystyczne dla danego sektora
+       - TWÓRZ całkowicie nowe opisy stanowisk wykorzystując słowa kluczowe z ogłoszenia
     
     2. Zaawansowana personalizacja:
        - Dopasuj tone of voice do kultury firmy i branży
