@@ -19,9 +19,18 @@ headers = {
     "HTTP-Referer": "https://cv-optimizer-pro.repl.co/"  # Replace with your actual domain
 }
 
-def send_api_request(prompt, max_tokens=2000):
+def send_api_request(prompt, max_tokens=2000, retry_count=3, retry_delay=2):
     """
-    Send a request to the OpenRouter API
+    Send a request to the OpenRouter API with retry logic for rate limiting
+    
+    Args:
+        prompt (str): The prompt to send to the AI
+        max_tokens (int): Maximum number of tokens in the response
+        retry_count (int): Number of retry attempts for rate limiting errors
+        retry_delay (int): Delay in seconds between retries
+        
+    Returns:
+        str: The AI-generated response or a fallback message if all retries fail
     """
     if not OPENROUTER_API_KEY:
         logger.error("OpenRouter API key not found")
@@ -36,26 +45,58 @@ def send_api_request(prompt, max_tokens=2000):
         "max_tokens": max_tokens
     }
     
-    try:
-        logger.debug(f"Sending request to OpenRouter API")
-        response = requests.post(OPENROUTER_BASE_URL, headers=headers, json=payload)
-        response.raise_for_status()
+    # Implement retry logic for rate limiting
+    attempts = 0
+    while attempts < retry_count:
+        try:
+            logger.debug(f"Sending request to OpenRouter API (attempt {attempts+1}/{retry_count})")
+            response = requests.post(OPENROUTER_BASE_URL, headers=headers, json=payload)
+            
+            # Check specifically for rate limiting error
+            if response.status_code == 429:
+                attempts += 1
+                if attempts < retry_count:
+                    retry_time = retry_delay * (2 ** (attempts - 1))  # Exponential backoff
+                    logger.warning(f"Rate limit hit. Retrying in {retry_time} seconds...")
+                    import time
+                    time.sleep(retry_time)
+                    continue
+                else:
+                    logger.error("Rate limit exceeded after maximum retries")
+                    raise Exception("Przekroczono limit zapytań API. Proszę spróbować ponownie później.")
+            
+            # For other errors, raise immediately
+            response.raise_for_status()
+            
+            result = response.json()
+            logger.debug(f"Received response from OpenRouter API")
+            
+            if 'choices' in result and len(result['choices']) > 0:
+                return result['choices'][0]['message']['content']
+            else:
+                raise ValueError("Unexpected API response format")
         
-        result = response.json()
-        logger.debug(f"Received response from OpenRouter API")
+        except requests.exceptions.RequestException as e:
+            logger.error(f"API request failed: {str(e)}")
+            if "429" in str(e):
+                # This is a rate limiting error
+                attempts += 1
+                if attempts < retry_count:
+                    retry_time = retry_delay * (2 ** (attempts - 1))
+                    logger.warning(f"Rate limit hit. Retrying in {retry_time} seconds...")
+                    import time
+                    time.sleep(retry_time)
+                    continue
+            
+            # For non-rate limiting errors or if we've exhausted retries
+            raise Exception(f"Błąd komunikacji z API OpenRouter: {str(e)}")
         
-        if 'choices' in result and len(result['choices']) > 0:
-            return result['choices'][0]['message']['content']
-        else:
-            raise ValueError("Unexpected API response format")
-    
-    except requests.exceptions.RequestException as e:
-        logger.error(f"API request failed: {str(e)}")
-        raise Exception(f"Failed to communicate with OpenRouter API: {str(e)}")
-    
-    except (KeyError, IndexError, json.JSONDecodeError) as e:
-        logger.error(f"Error parsing API response: {str(e)}")
-        raise Exception(f"Failed to parse OpenRouter API response: {str(e)}")
+        except (KeyError, IndexError, json.JSONDecodeError) as e:
+            logger.error(f"Error parsing API response: {str(e)}")
+            raise Exception(f"Błąd przetwarzania odpowiedzi API: {str(e)}")
+            
+    # This should only be reached if we've exhausted our retries on rate limiting
+    return "Przepraszamy, nie można przetworzyć zapytania w tym momencie z powodu przekroczenia limitu zapytań. Proszę spróbować ponownie później."
 
 def detect_seniority_level(cv_text, job_description):
     """
