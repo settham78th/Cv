@@ -826,12 +826,35 @@ def optimize_cv_with_keywords(cv_text, job_description, keywords_data=None):
         missing_competencies_suggestions += f"- {skill}\n"
     
     prompt = f"""
-    TASK: Stwórz całkowicie nową, spersonalizowaną wersję CV precyzyjnie dopasowaną do wymagań stanowiska, wraz z sugestiami dodatkowych umiejętności i kwalifikacji.
+    TASK: Stwórz całkowicie nową, spersonalizowaną wersję CV precyzyjnie dopasowaną do wymagań stanowiska, wraz z wyraźnie wydzielonymi sekcjami umiejętności miękkich i twardych oraz dodatkowymi kwalifikacjami.
     
     Wykryty poziom doświadczenia: {seniority.upper()}
     Wykryta branża: {industry.upper()}
     Wykryty typ pracy: {job_type.upper()}
     Wykryta konkretna rola: {specific_role.upper()}
+    
+    FORMATOWANIE SEKCJI UMIEJĘTNOŚCI:
+    
+    1. Wyraźnie podziel umiejętności na dwie kategorie:
+       a) Umiejętności twarde (techniczne/specjalistyczne) z oznaczeniem "**":
+          **Umiejętności twarde:**
+          - [Konkretna umiejętność techniczna/specjalistyczna 1]
+          - [Konkretna umiejętność techniczna/specjalistyczna 2]
+          
+       b) Umiejętności miękkie z oznaczeniem "**":
+          **Umiejętności miękkie:**
+          - [Konkretna umiejętność miękka 1]
+          - [Konkretna umiejętność miękka 2]
+          
+    2. Dodatkowe umiejętności również wydziel w osobnej sekcji z pogrubioną nazwą:
+       **Dodatkowe umiejętności:**
+       - [Dodatkowa umiejętność 1]
+       - [Dodatkowa umiejętność 2]
+    
+    3. Certyfikaty i kwalifikacje umieść w osobnej sekcji z pogrubieniem:
+       **DODATKOWE KWALIFIKACJE:**
+       - [Certyfikat/kwalifikacja 1]
+       - [Certyfikat/kwalifikacja 2]
     
     ANALIZA BRAKUJĄCYCH ELEMENTÓW:
     1. Przeanalizuj wymagania ze stanowiska i porównaj z obecnym CV
@@ -842,10 +865,21 @@ def optimize_cv_with_keywords(cv_text, job_description, keywords_data=None):
     
     Format dla sugestii:
     [SUGESTIE ROZWOJU]
-    - Umiejętności do zdobycia: (lista umiejętności z poziomem ważności)
-    - Rekomendowane certyfikaty: (lista certyfikatów)
-    - Sugerowane szkolenia: (lista szkoleń)
-    - Obszary do rozwoju: (konkretne aspekty doświadczenia)
+    **Umiejętności do zdobycia:**
+    - [umiejętność 1] (wysoki priorytet)
+    - [umiejętność 2] (średni priorytet)
+    
+    **Rekomendowane certyfikaty:**
+    - [certyfikat 1]
+    - [certyfikat 2]
+    
+    **Sugerowane szkolenia:**
+    - [szkolenie 1]
+    - [szkolenie 2]
+    
+    **Obszary do rozwoju:**
+    - [konkretny aspekt doświadczenia 1]
+    - [konkretny aspekt doświadczenia 2]
     
     SZCZEGÓŁOWE WYTYCZNE DLA SEKCJI DOŚWIADCZENIA ZAWODOWEGO:
     
