@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 # OpenRouter API configuration
 OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
-DEFAULT_MODEL = "openai/gpt-3.5-turbo"
+DEFAULT_MODEL = "mistralai/mistral-7b-instruct:free"  # Darmowy model Mistral
 
 def process_text_with_ai(text, prompt, model=DEFAULT_MODEL):
     """
