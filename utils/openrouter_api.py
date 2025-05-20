@@ -846,35 +846,48 @@ def optimize_cv_with_keywords(cv_text, job_description, keywords_data=None):
         missing_competencies_suggestions += f"- {skill}\n"
     
     prompt = f"""
-    TASK: Stwórz całkowicie nową, spersonalizowaną wersję CV precyzyjnie dopasowaną do wymagań stanowiska, wraz z wyraźnie wydzielonymi sekcjami umiejętności miękkich i twardych oraz dodatkowymi kwalifikacjami.
+    TASK: Stwórz całkowicie nową, mistrzowską wersję CV, które zdecydowanie wyróżni kandydata na tle konkurencji. CV musi być precyzyjnie dopasowane do wymagań stanowiska, zawierać profesjonalne sformułowania i podkreślać najważniejsze osiągnięcia i umiejętności.
     
     Wykryty poziom doświadczenia: {seniority.upper()}
     Wykryta branża: {industry.upper()}
     Wykryty typ pracy: {job_type.upper()}
     Wykryta konkretna rola: {specific_role.upper()}
     
-    FORMATOWANIE SEKCJI UMIEJĘTNOŚCI:
+    WSKAZÓWKI PROFESJONALNEGO FORMATOWANIA:
     
-    1. Wyraźnie podziel umiejętności na dwie kategorie:
-       a) Umiejętności twarde (techniczne/specjalistyczne) z oznaczeniem "**":
-          **Umiejętności twarde:**
-          - [Konkretna umiejętność techniczna/specjalistyczna 1]
-          - [Konkretna umiejętność techniczna/specjalistyczna 2]
+    1. Rozpocznij od mocnego, ukierunkowanego na stanowisko podsumowania zawodowego (3-4 zdania), które:
+       - Natychmiast przyciągnie uwagę rekrutera
+       - Podkreśli najważniejsze kwalifikacje odpowiadające stanowisku
+       - Zawiera 2-3 najważniejsze osiągnięcia z liczbami/procentami
+       - Jest napisane w pierwszej osobie, aktywnym językiem
+    
+    2. FORMATOWANIE SEKCJI UMIEJĘTNOŚCI - zastosuj nowoczesne podejście:
+    
+       a) Umiejętności twarde (techniczne/specjalistyczne) z oznaczeniem "**" i poziomem zaawansowania:
+          **Umiejętności techniczne:**
+          - [Kluczowa umiejętność 1 powiązana ze stanowiskiem] (Zaawansowany)
+          - [Kluczowa umiejętność 2 powiązana ze stanowiskiem] (Średniozaawansowany)
+          - [Umiejętność techniczna 3] (Podstawowy)
           
-       b) Umiejętności miękkie z oznaczeniem "**":
-          **Umiejętności miękkie:**
-          - [Konkretna umiejętność miękka 1]
-          - [Konkretna umiejętność miękka 2]
+       b) Umiejętności miękkie z oznaczeniem "**" i konkretnym zastosowaniem:
+          **Umiejętności interpersonalne:**
+          - [Umiejętność miękka 1] (z przykładem zastosowania)
+          - [Umiejętność miękka 2] (z przykładem zastosowania)
           
-    2. Dodatkowe umiejętności również wydziel w osobnej sekcji z pogrubioną nazwą:
+       c) Umiejętności branżowe z oznaczeniem "**" - specyficzne dla danej branży:
+          **Umiejętności branżowe:**
+          - [Specjalistyczna umiejętność branżowa 1]
+          - [Specjalistyczna umiejętność branżowa 2]
+          
+    3. Dodatkowe umiejętności również wydziel w osobnej sekcji z pogrubieniem, ale bardziej skonkretyzowane:
        **Dodatkowe umiejętności:**
-       - [Dodatkowa umiejętność 1]
-       - [Dodatkowa umiejętność 2]
+       - [Konkretna dodatkowa umiejętność 1 wspierająca główne kwalifikacje]
+       - [Konkretna dodatkowa umiejętność 2 zwiększająca konkurencyjność kandydata]
     
-    3. Certyfikaty i kwalifikacje umieść w osobnej sekcji z pogrubieniem:
-       **DODATKOWE KWALIFIKACJE:**
-       - [Certyfikat/kwalifikacja 1]
-       - [Certyfikat/kwalifikacja 2]
+    4. Certyfikaty i kwalifikacje umieść w osobnej sekcji z pogrubieniem i datami uzyskania:
+       **CERTYFIKATY I KWALIFIKACJE:**
+       - [Nazwa certyfikatu 1] (Rok uzyskania)
+       - [Nazwa certyfikatu 2] (Rok uzyskania - ważny do [Rok])
     
     ANALIZA BRAKUJĄCYCH ELEMENTÓW:
     1. Przeanalizuj wymagania ze stanowiska i porównaj z obecnym CV
