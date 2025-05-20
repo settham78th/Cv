@@ -916,41 +916,46 @@ def optimize_cv_with_keywords(cv_text, job_description, keywords_data=None):
     
     SZCZEGÓŁOWE WYTYCZNE DLA SEKCJI DOŚWIADCZENIA ZAWODOWEGO:
     
-    UWAGA: KONIECZNIE PRZEANALIZUJ I ZNACZĄCO ULEPSZ OPISY DOŚWIADCZENIA Z ORYGINALNEGO CV!
-    Nie kopiuj ich bezpośrednio, ale przekształć je w znaczący sposób, zachowując fakty i chronologię.
+    SEKCJA DOŚWIADCZENIA ZAWODOWEGO - ZASADY MISTRZOWSKIEGO CV:
     
-    1. Transformacja opisów stanowisk:
-       - OBOWIĄZKOWO zacznij każdy punkt mocnym czasownikiem akcji (zarządzałem, wdrożyłem, zoptymalizowałem)
-       - DODAJ konkretne liczby i mierzalne wyniki (zwiększenie wydajności o X%, obsługa Y klientów)
-       - WYEKSPONUJ kluczowe osiągnięcia wyróżniające kandydata
-       - STWÓRZ całkowicie nowe, lepsze sformułowania dla każdego punktu z oryginalnego CV
+    UWAGA: KONIECZNIE PRZEANALIZUJ I KOMPLEKSOWO PRZEOBRAŹ OPISY DOŚWIADCZENIA Z ORYGINALNEGO CV!
+    Nie kopiuj, ale całkowicie przetwórz treść, zachowując prawdziwe fakty i chronologię.
     
-    2. Ulepszona struktura każdego stanowiska:
-       - **Nazwa stanowiska:** [Precyzyjna i zgodna z branżowymi standardami]
-       - **Firma:** [Pełna nazwa z krótkim opisem działalności]
-       - **Okres zatrudnienia:** [Format MM.RRRR - MM.RRRR]
-       - **Kluczowe obowiązki i osiągnięcia:**
-         • [Mocny czasownik + konkretne zadanie + mierzalny rezultat]
-         • [Mocny czasownik + konkretne zadanie + mierzalny rezultat]
-         • [Mocny czasownik + konkretne zadanie + mierzalny rezultat]
+    1. Mistrzowskie opisy stanowisk:
+       - ROZPOCZNIJ każdy punkt MOCNYM CZASOWNIKIEM EFEKTU (zoptymalizowałem, zwiększyłem, wdrożyłem)
+       - OBOWIĄZKOWO dołącz LICZBY i PRECYZYJNE DANE (zwiększenie X o Y%, obsługa Z klientów miesięcznie)
+       - ZASTOSUJ metodę STAR (Sytuacja, Zadanie, Działanie, Rezultat) dla najważniejszych osiągnięć
+       - PODKREŚL wymierne rezultaty, które przyniosły KORZYŚCI dla pracodawcy (oszczędności, wzrost efektywności)
+       - DOPASUJ każde doświadczenie do wymagań NOWEGO stanowiska
     
-    3. Kompletna transformacja treści:
-       - CAŁKOWICIE PRZEPISZ ogólnikowe sformułowania z oryginalnego CV na konkretne i precyzyjne
-       - ZAMIEŃ pasywne opisy na aktywne sformułowania (np. zamiast "byłem odpowiedzialny za" użyj "zarządzałem")
-       - DODAJ branżowe słownictwo i terminologię zgodną z ogłoszeniem o pracę
-       - USUŃ zbędne, powtarzające się czy nieistotne informacje
-       - POŁĄCZ podobne punkty w jeden silniejszy, bardziej konkretny opis
+    2. Profesjonalna struktura każdego stanowiska:
+       - **Nazwa stanowiska:** [Precyzyjna, marketingowa i zgodna ze standardami branżowymi]
+       - **Firma | Lokalizacja:** [Nazwa firmy + miasto lub region]
+       - **Okres zatrudnienia:** [MM.RRRR - MM.RRRR] lub [MM.RRRR - obecnie]
+       - **Krótki opis firmy:** [1 zdanie o profilu działalności, wielkości, zasięgu]
+       - **Najważniejsze osiągnięcia i odpowiedzialności:**
+         • [Mocny czasownik + konkretne zadanie + mierzalny rezultat + korzyść dla firmy]
+         • [Mocny czasownik + konkretne zadanie + mierzalny rezultat + korzyść dla firmy]
+         • [Mocny czasownik + konkretne zadanie + mierzalny rezultat + korzyść dla firmy]
     
-    4. Przykłady transformacji doświadczenia (STOSUJ PODOBNE PODEJŚCIE):
+    3. Strategiczna transformacja treści:
+       - CAŁKOWICIE PRZEFORMUŁUJ każdy element doświadczenia pod kątem NOWEGO stanowiska
+       - UŻYWAJ wyłącznie AKTYWNYCH konstrukcji językowych (nigdy "byłem odpowiedzialny za")
+       - WŁĄCZ słowa kluczowe i terminologię z OGŁOSZENIA o pracę (minimum 5-7 kluczowych terminów)
+       - STOSUJ JĘZYK BRANŻOWY właściwy dla poziomu stanowiska
+       - OGRANICZ każdy punkt do maksymalnie 2 linijek tekstu
+       - USUŃ wszystko, co nie wspiera Twojej kandydatury na NOWE stanowisko
+       
+    4. Przykłady transformacji - najwyższy poziom profesjonalizmu:
     
        PRZED: "Odpowiadałem za obsługę klienta i realizację zamówień."
-       PO: "Obsłużyłem średnio 45 klientów dziennie, utrzymując 98% poziom satysfakcji i skracając czas realizacji zamówień o 15%."
+       PO: "Obsłużyłem średnio 45 klientów dziennie (największa liczba w zespole), utrzymując 98% wskaźnik satysfakcji i skracając średni czas realizacji zamówień o 15%, co przełożyło się na wzrost sprzedaży o 8% w ciągu kwartału."
        
        PRZED: "Kierowałem samochodem dostawczym."
-       PO: "Prowadziłem pojazd dostawczy klasy B, realizując 25-30 dostaw dziennie na terenie aglomeracji, utrzymując 100% terminowość i bezbłędną dokumentację transportową."
+       PO: "Zoptymalizowałem 15 tras dostaw w aglomeracji warszawskiej, co skróciło czas dostawy o 12% i zmniejszyło zużycie paliwa o 8%, realizując 25-30 punktów dziennie z bezbłędną dokumentacją i 100% terminowością przez 24 miesiące."
        
        PRZED: "Zajmowałem się organizacją magazynu."
-       PO: "Zreorganizowałem system magazynowy, wprowadzając oznaczenia kolorystyczne i strefowanie, co skróciło czas kompletacji zamówień o 22% i zmniejszyło liczbę błędów o 35%."
+       PO: "Przeprojektowałem układ magazynu o powierzchni 1200m² wraz z systemem oznakowania i strefowania, co zwiększyło przepustowość o 27%, skróciło czas kompletacji o 22% i zredukowało liczbę błędów o 35%, przynosząc oszczędności rzędu 15 000 zł miesięcznie."
     
     Kluczowe wytyczne optymalizacji:
     1. Głęboka analiza i transformacja doświadczenia:
