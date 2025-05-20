@@ -19,9 +19,9 @@ headers = {
     "HTTP-Referer": "https://cv-optimizer-pro.repl.co/"  # Replace with your actual domain
 }
 
-def send_api_request(prompt, max_tokens=2000, retry_count=3, retry_delay=2):
+def send_api_request(prompt, max_tokens=2000, retry_count=1, retry_delay=1):
     """
-    Send a request to the OpenRouter API with retry logic for rate limiting
+    Send a request to the OpenRouter API with minimal retry logic
     
     Args:
         prompt (str): The prompt to send to the AI
@@ -45,58 +45,37 @@ def send_api_request(prompt, max_tokens=2000, retry_count=3, retry_delay=2):
         "max_tokens": max_tokens
     }
     
-    # Implement retry logic for rate limiting
-    attempts = 0
-    while attempts < retry_count:
-        try:
-            logger.debug(f"Sending request to OpenRouter API (attempt {attempts+1}/{retry_count})")
-            response = requests.post(OPENROUTER_BASE_URL, headers=headers, json=payload)
-            
-            # Check specifically for rate limiting error
-            if response.status_code == 429:
-                attempts += 1
-                if attempts < retry_count:
-                    retry_time = retry_delay * (2 ** (attempts - 1))  # Exponential backoff
-                    logger.warning(f"Rate limit hit. Retrying in {retry_time} seconds...")
-                    import time
-                    time.sleep(retry_time)
-                    continue
-                else:
-                    logger.error("Rate limit exceeded after maximum retries")
-                    raise Exception("Przekroczono limit zapytań API. Proszę spróbować ponownie później.")
-            
-            # For other errors, raise immediately
-            response.raise_for_status()
-            
-            result = response.json()
-            logger.debug(f"Received response from OpenRouter API")
-            
-            if 'choices' in result and len(result['choices']) > 0:
-                return result['choices'][0]['message']['content']
-            else:
-                raise ValueError("Unexpected API response format")
+    try:
+        logger.debug(f"Sending request to OpenRouter API")
+        response = requests.post(OPENROUTER_BASE_URL, headers=headers, json=payload, timeout=5)
         
-        except requests.exceptions.RequestException as e:
-            logger.error(f"API request failed: {str(e)}")
-            if "429" in str(e):
-                # This is a rate limiting error
-                attempts += 1
-                if attempts < retry_count:
-                    retry_time = retry_delay * (2 ** (attempts - 1))
-                    logger.warning(f"Rate limit hit. Retrying in {retry_time} seconds...")
-                    import time
-                    time.sleep(retry_time)
-                    continue
-            
-            # For non-rate limiting errors or if we've exhausted retries
-            raise Exception(f"Błąd komunikacji z API OpenRouter: {str(e)}")
+        # Check specifically for rate limiting error
+        if response.status_code == 429:
+            logger.error("Rate limit hit from OpenRouter API")
+            # W przypadku ograniczenia zapytań, zwracamy przygotowany komunikat bez ponownych prób
+            return "[RATE_LIMITED] Przekroczono limit zapytań API. Proszę spróbować ponownie za kilka minut."
         
-        except (KeyError, IndexError, json.JSONDecodeError) as e:
-            logger.error(f"Error parsing API response: {str(e)}")
-            raise Exception(f"Błąd przetwarzania odpowiedzi API: {str(e)}")
-            
-    # This should only be reached if we've exhausted our retries on rate limiting
-    return "Przepraszamy, nie można przetworzyć zapytania w tym momencie z powodu przekroczenia limitu zapytań. Proszę spróbować ponownie później."
+        # For other errors, raise immediately
+        response.raise_for_status()
+        
+        result = response.json()
+        logger.debug(f"Received response from OpenRouter API")
+        
+        if 'choices' in result and len(result['choices']) > 0:
+            return result['choices'][0]['message']['content']
+        else:
+            logger.error("Unexpected API response format")
+            return "[ERROR] Nieoczekiwany format odpowiedzi API."
+    
+    except requests.exceptions.RequestException as e:
+        logger.error(f"API request failed: {str(e)}")
+        if "429" in str(e):
+            return "[RATE_LIMITED] Przekroczono limit zapytań API. Proszę spróbować ponownie za kilka minut."
+        return f"[ERROR] Błąd komunikacji z API: {str(e)}"
+    
+    except (KeyError, IndexError, json.JSONDecodeError) as e:
+        logger.error(f"Error parsing API response: {str(e)}")
+        return f"[ERROR] Błąd przetwarzania odpowiedzi API: {str(e)}"
 
 def detect_seniority_level(cv_text, job_description):
     """
